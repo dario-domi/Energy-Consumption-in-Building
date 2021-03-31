@@ -24,7 +24,7 @@ month.indices <- c(1:5, 9:12)
 Global_IM <- matrix(nrow = N, ncol = length(month.indices))
 colnames(Global_IM) <- month.names[month.indices]
 
-Mod.Discr <- 0.1
+Mod.Discr <- 0.2
 Meas.Err <- 0.05
 for (i in month.indices){
   month <- month.names[i]
@@ -95,6 +95,7 @@ Table <- read.xlsx(file)
 
 ## DATES AND TIMES
 DateTimes <- Table[,1]
+# Convert numbers into actual dates, using as.POSIXct
 DateTimes <- as.POSIXct(DateTimes*86400, origin="1899-12-30", tz='Europe/London')
 
 ## KITCHEN TEMPERATURES
@@ -113,9 +114,15 @@ load('RData/Simulated-Temperatures.RData')
 ##                       CODE FOR SOME PLOTS
 ################################################################
 
-# Observed time series (save plot)
-plot(DateTimes, Kitch.Obs, ty='l', col='blue', lwd=1, xaxt='n', ann = F)
-axis.POSIXct(side=1, x=DateTimes, format = "%d %b")       # format of x tick-labels
+# Observed time series
+plot(DateTimes, Kitch.Obs, ty='l', col='blue', main='Observed Kitchen Temperature')
+plot(DateTimes, Master.Obs, ty='l', col='blue', main='Observed Kitchen Temperature')
+
+# Zooming
+zoom <- 500:700
+plot(DateTimes[zoom], Kitch.Obs[zoom], ty='l', col = 'blue', xaxt='n', ylim = c(15,23))
+lines(DateTimes[zoom], Kitch.Sim[zoom,2], ty='l', col = 'red')
+axis.POSIXct(side=1, x=DateTimes[zoom], format = "%d %b") # read ?strptime for date format
 
 
 # Plots of observed and simulated time-series (overlapped)
@@ -130,63 +137,66 @@ while (T){
   Sys.sleep(1)
 }
 
-# Zooming
-zoom <- 700:1000
-plot(DateTimes[zoom], Kitch.Obs[zoom], ty='l', col = 'red', xaxt='n')
-axis.POSIXct(side=1, x=DateTimes[zoom], format = "%d %b") # read ?strptime for date format
-
 
 
 #################################################################
 ##                COMPUTE L2 DIFFERENCE
 #################################################################
 
-load('RData/Test_Inputs.RData')
-Test.points.full <- 2*Test.points.full
 
+load('RData/Test_Inputs.RData')
 All.regr <- predict(Interactions.Design, newdata = Test.points.full)
 
-# Normalised squared L2-norm of difference between observed and simulated temperatures
+# Squared L2-norm of difference between observed and simulated temperatures
 times <- 2879:6550 # May-Sep
 times <- 1:length(DateTimes)
 Diff.K <- apply((Kitch.Sim[times,] - Kitch.Obs[times])^2, 2, sum)/length(times)
 Diff.M <- apply((Master.Sim[times,] - Master.Obs[times])^2, 2, sum)/length(times)
 hist((Diff.M), breaks = 40)
 
+
 # LR with 2nd order terms
-y <- (Diff.M)
+y <- Diff.M
 Interactions.Design <- poly(data.matrix(Design), degree=2)
 L <- summary(regsubsets(y~., data=Interactions.Design, method = "exhaustive", nvmax = 5))
 ind <- which.max(L$adjr2)          # index (between 1 and nvmax) of model with max adj-R2
-regr <- L$which[ind,-1]            # logical vector with regressors corresponding to selected model
-fit <- lm(y~ ., data = as.data.frame(Interactions.Design[,regr]))
-summary(fit)
+regr.M <- L$which[ind,-1]            # logical vector with regressors corresponding to selected model
+fit.M <- lm(y~ ., data = as.data.frame(Interactions.Design[,regr]))
+summary(fit.K)
 
 
 ## PREDICTIONS ON TEST SET
 
-preds.l2.M <- predict(fit, newdata = as.data.frame(All.regr[, regr]))
-hist(preds.l2.M, breaks=300, xlim = c(0,5))
-summary(preds.l2.M)
+preds.l2.K <- predict(fit.K, newdata = as.data.frame(All.regr[, regr.K]))
+preds.l2.M <- predict(fit.M, newdata = as.data.frame(All.regr[, regr.M]))
 
-compat.l2.M <- (preds.l2.M<0.8)
-compat.l2 <- compat.l2.M
-sum(compat.l2)/length(compat.l2)
+hist(preds.l2.K, breaks=300, xlim = c(1,2))
+hist(preds.l2.M, breaks=300, xlim = c(0,1.5))
+
+compat.l2.M <- (preds.l2.M<0.9)
+compat.l2.K <- (preds.l2.K<1.3)
+compat.l2 <- compat.l2.K
 
 # Marginals of input coordinates
-hist(Test.points.full[compat.l2,1], breaks=100, xlim = c(-2,2), freq = F)
+hist(Test.points.full[compat.l2,1], breaks=100, xlim = c(-1,1), freq = F)
 
-# 2D marginals (scatter plot)
+# 2D marginals for Kitchen
 c1=1
 c2=6
-plot(Test.points.full[compat.l2,c1], Test.points.full[compat.l2,c2], 
-     xlim = c(-2,2), ylim = c(-2,2), cex=0.0005,
+plot(Test.points.full[compat.l2.K,c1], Test.points.full[compat.l2.K,c2], 
+     col = rgb(0,0,1,0.1),
+     xlim = c(-1,1), ylim = c(-1,1), cex=0.2,
      xlab = colnames(Design)[c1],
      ylab = colnames(Design)[c2])
+# Add same plot for Master room
+lines(Test.points.full[compat.l2.M,c1], Test.points.full[compat.l2.M,c2],
+      col = rgb(1,0,0, 0.6), cex=0.2)
+
+
 
 # Add compatibility with monthly gas consumption
 points(Test.points.full[compat.gas,c1], Test.points.full[compat.gas,c2], 
-       cex=0.4, col='red')
+     cex=0.4, col=rgb(0,1,0,0.2))
 legend('topleft', legend = c('L2', 'Gas'), col=c('black', 'red'), pch = c(20,20))
 
 
