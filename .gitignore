@@ -1,4 +1,15 @@
+# Ignore all .Rhistory files
 .Rhistory
-Pictures/**/*.pdf
-RData/*.RData
+
+# Ignore all .RData files in (or below) folder RData 
+#RData/**/*.RData
+
+# Ignore all automatically generated files from latex
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz 
+
+# Ignore the following folder
 Z_Other_documents/
