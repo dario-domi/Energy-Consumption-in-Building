@@ -4,6 +4,9 @@
 # Ignore all .RData files in (or below) folder RData 
 #RData/**/*.RData
 
+# Ignore Explore_elec_dataset.R
+RCode/Explore_elec_dataset.R
+
 # Ignore all automatically generated files from latex
 *.aux
 *.log
