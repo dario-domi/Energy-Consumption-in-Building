@@ -1,17 +1,17 @@
-setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/')
+setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
 
 library(openxlsx)
 library(leaps)
 library(fields)
-source('Scripts/Auxiliary_Functions.R')
-source('../Emulation.R')
-source('Scripts/Find_Optimal_Params.R')
+source('Auxiliary_Scripts/Auxiliary_Functions.R')
+source('../../Emulation.R')
+source('Auxiliary_Scripts/Find_Optimal_Params.R')
 
 ###############################################################################
 # LOAD OBSERVED AND SIMULATED TEMPERATURES: hourly, for one year (8760 obs)
 ###############################################################################
 
-file <- "Data/Temperature_Data/Actual Space Temperatures - Dario.xlsx"
+file <- "../Data/Temperature_Data/Actual Space Temperatures - Dario.xlsx"
 Table <- read.xlsx(file)
 
 ## DATES AND TIMES
@@ -30,8 +30,9 @@ rm(file, Table)
 load('RData/Simulated-Temperatures.RData')
 
 # DESIGN POINTS
-source('Scripts/Load_data.R') 
+source('Auxiliary_Scripts/Load_data.R') 
 Design <- Rescale.Linearly(Design)
+rm(Outputs_gas, Obs_gas, month.names, Create.my.list)
 
 
 ##########  Computing daily maxima
@@ -94,8 +95,16 @@ x <- Max.Kitch.Sim[times, ] - Max.Kitch.Obs[times]
 Impl.Kitch.Aug <- diag( t(x)%*%solve(V.tot, x) )/length(times)
 
 
+##################################################
+##### SAVE IMPLAUSIBILITIES
+
+save(Impl.Mast.Jun, Impl.Kitch.Jun,
+     Impl.Mast.Jul, Impl.Kitch.Jul,
+     Impl.Mast.Aug, Impl.Kitch.Aug,
+     file = "RData/Summer_Implausibilities.RData")
 
 
+###################################################
 ### PLOTS OF OBSERVED AND SIMULATED TRAJECTORIES
 
 times <- 152:181 # June
@@ -109,7 +118,7 @@ Impl <- Impl.Kitch.Jun
 
 Obs <- Max.Mast.Obs
 Sim <- Max.Mast.Sim
-Impl <- Impl.Mast.Jun
+Impl <- Impl.Mast.Aug
 
 while (T) {
   i <- sample(1000, 1)
@@ -151,6 +160,10 @@ abline(h=0, lty=2)
 points(x, col='blue')
 
 ## Compare NROY space (on 1000 design runs) for June, July, August
+Impl <- sqrt(Impl.Mast.Jun)
+ind.Jun <- Impl<3
+Impl <- sqrt(Impl.Mast.Jul)
+ind.Jul <- Impl<3
 Impl <- sqrt(Impl.Mast.Aug)
 ind.Aug <- Impl<3
 sum(ind.Jun)/length(Impl)
@@ -168,133 +181,17 @@ points(Design[ind.Aug,6], Design[ind.Aug,3], col='darkgreen', pch=20, cex=1)
 ### BUILD LINEAR REGRESSION AND EMULATOR MODELS
 ####################################################
 
-Impl <- Impl.Mast.Jul
-
-##### LINEAR REGRESSION
-set.seed(5879, kind = "default")
-train <- sample(1:1000, 750)
-cross <- sample((1:1000)[-train], 150)
-test <- (1:1000)[-c(train, cross)]
-y.train <- Impl[train]
-y.cross <- Impl[cross]
-y.test <- Impl[test]
-
-# Select regressors and active variables to use
-Interactions <- poly(as.matrix(Design[,]), degree=4)
-L <- summary(regsubsets(y.train~., data=as.data.frame(Interactions[train,]), method = "forward", nvmax = 15))
-which(regr <- L$which[5,-1])            # logical vector with regressors corresponding to selected model
-fit <- lm(y.train~ ., data = as.data.frame(Interactions[train, regr ]))
-summary(fit)
-
-
-##### EMULATOR
-# July, Master: c(1,3,4,6)
-# July, Kitchen: c(1,6,8)
-Active.Inputs <- c(1,3,4,6)
-Train.ActInp <- Design[train, Active.Inputs, drop=F]         # design points used to train the emulator
-Train.regr <- cbind(1, Interactions[train, regr, drop=F])   # regressors: add a column of 1s for intercept
-Cross.ActInp <- Design[cross, Active.Inputs, drop=F]
-Cross.regr <- cbind(1, Interactions[cross, regr, drop=F])   
-Test.ActInp  <- Design[test, Active.Inputs, drop=F]
-Test.regr  <- cbind(1, Interactions[test, regr, drop=F])
-
-# Regression coefficients mean and covariance
-beta <- fit$coefficients
-Cov.beta <- vcov(fit)
-
-################################################
-# FIND THE OPTIMAL PARAMETERS
-
-# Initial values for optimisation
-N_var_GP <- length(Active.Inputs)
-d0 <- 0.4*replicate(N_var_GP, 1)         # Correlation lengths
-s2.tot0 <- var(fit$residuals)        # Prior cumulative variance of homoschedastic Gaussian process
-nug_frac0 <- 0.05                          # Fraction of residual variability not explained by regressors
-kernel <- 'exp2'
-
-Opt.pars <- Find.Optimal.Parameters(Train.ActInp, Train.regr,
-                                    Cross.ActInp, Cross.regr,
-                                    y.train, y.cross, 
-                                    kernel, d0, s2.tot0, nug_frac0)
-sig2.Mast.Jun <- Opt.pars$s2
-nu2.Mast.Jun <- Opt.pars$nu2
-d.Mast.Jun <- Opt.pars$d
-
-## Compare performance on cross-validation set and test set
-sig2 <- sig2.Mast.Jul
-nu2 <- nu2.Mast.Jul
-d <- d.Mast.Jul
-
-res.test <- BL.Emul(Train.ActInp, Test.ActInp, y.train, 
-                     Regress.Design = Train.regr, 
-                     Regress.Test = Test.regr, 
-                     beta = beta, Cov.beta = Cov.beta, 
-                     sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
-
-res.cross <- BL.Emul(Train.ActInp, Cross.ActInp, y.train, 
-                    Regress.Design = Train.regr, 
-                    Regress.Test = Cross.regr, 
-                    beta = beta, Cov.beta = Cov.beta, 
-                    sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
-
-sum(dnorm(y.cross, mean = res.cross[,1], sd = sqrt(res.cross[,2]), log = T))/length(y.cross)
-sum(dnorm(y.test, mean = res.test[,1], sd = sqrt(res.test[,2]), log = T))/length(y.test)
-
-View(cbind(y.test, res.test[,1], sqrt(res.test[,2])))
-
-hist( (y.test-res.test[,1])/sqrt(res.test[,2]), breaks = 30)
-hist(sqrt(res.test[,2]), breaks = 30)
-hist( y.test-res.test[,1]  , breaks = 30)
-
-save(sig2.Mast.Jul, nu2.Mast.Jul, d.Mast.Jul,
-     sig2.Kitch.Jul, nu2.Kitch.Jul, d.Kitch.Jul,
-     sig2.Mast.Jun, nu2.Mast.Jun, d.Mast.Jun,
-     file = "RData/Opt_Params_MaxSummerMonths.RData")
-
+source('Temperature_Implausibility_Emulator.R')
 
 ##############################################
-# PREDICT OVER LOTS OF POINTS
-
-load('RData/Results_First_Million.RData') # loads res1
-load('RData/Test_Inputs.RData') # loads Test.points.full
-
-Test.points <- Test.points.full[1:1.e4, ]
-All.regr <- predict(Interactions, newdata = Test.points)
-Testall.ActInp <- Test.points[, Active.Inputs]
-Testall.regr <- cbind(1, All.regr[,regr])
-
-sig2 <- sig2.Kitch.Jun
-nu2 <- nu2.Kitch.Jun
-d <- d.Kitch.Jun
-
-sig2 <- sig2.Mast.Jul
-nu2 <- nu2.Mast.Jul
-d <- d.Mast.Jul
-
-Emul.Mast.Jul <- BL.Emul(Train.ActInp, Testall.ActInp, y.train, 
-                   Regress.Design = Train.regr, 
-                   Regress.Test = Testall.regr, 
-                   beta = beta, Cov.beta = Cov.beta, 
-                   sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
-
-res <- Emul.Mast.Jul
-res <- Emul.Kitch.Jul
-res <- Emul.Kitch.Jun
-res <- Emul.Mast.Jun
-
-ind <-(res[,1]-3*sqrt(res[,2]))<9
-sum(ind)/length(ind)
-sum(indM&indK)/length(ind)
+## EVALUATE EMULATORS ON SEVERAL POINTS
+##############################################
 
 
-plot(Test.points[ind,8], Test.points[ind,6],
-     cex =0.6, pch = 20, col='red',
-     xlim = c(-1,1), ylim = c(-1,1)
-)
-points(Test.points[ind,1], Test.points[ind,6],
-     cex =0.4, pch = 20, col='blue',
-     xlim = c(-1,1), ylim = c(-1,1)
-)
+
+
+
+
 
 
 

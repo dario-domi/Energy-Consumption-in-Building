@@ -72,7 +72,7 @@ Find.Optimal.Parameters <- function(Train.ActInp, Train.regr,
   x0 <- c(log(s2.tot0), nug_frac0, log(d0))
   opt.par <- optim(par = x0, fn = f, method = "L-BFGS-B", 
                    lower = c(-Inf, 0.0001, rep(-Inf,Nd)), upper = c(Inf, 1, rep(Inf,Nd)),
-                   control = list(trace=5, fnscale=-1)) 
+                   control = list(trace=6, fnscale=-1)) 
 
   # Return the optimised values
   s2.opt  <- exp(opt.par$par[1])*(1-opt.par$par[2])
