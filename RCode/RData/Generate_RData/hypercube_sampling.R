@@ -12,19 +12,19 @@ input_var[2,1]<-0.6 #Gas boiler seasonal efficiency
 input_var[2,2]<-0.75
 
 input_var[3,1]<-1.788-1.788*0.02 #Glazing (both with low emissivity coating)
-input_var[3,2]<-1.788+1.788*0.02
+input_var[3,2]<-1.788+1.788*0.02 #  (1.752, 1.824)
 
 input_var[4,1]<-0.691-0.691*0.05 #Glazing G Value (solar transmittance) 
-input_var[4,2]<-0.691+0.691*0.05
+input_var[4,2]<-0.691+0.691*0.05 #  (0.656, 0.725)
 
 input_var[5,1]<-0.544-0.544*0.15 #External walls [g]  ( W/m2K)
-input_var[5,2]<-0.544+0.544*0.15
+input_var[5,2]<-0.544+0.544*0.15 #  (0.462, 0.625)
 
 input_var[6,1]<-0.213-0.213*0.15 #Roof [g2]   (W/m2K)
-input_var[6,2]<-0.213+0.213*0.15
+input_var[6,2]<-0.213+0.213*0.15 #  (0.181, 0.245)
 
 input_var[7,1]<-0.337-0.337*0.05 #Floor [h]  ( W/m2K)
-input_var[7,2]<-0.337+0.337*0.05
+input_var[7,2]<-0.337+0.337*0.05 #  (0.320, 0.354)
 
 input_var[8,1]<-0.2 #Infiltration (ac/h) [f]
 input_var[8,2]<-0.95

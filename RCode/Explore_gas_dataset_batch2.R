@@ -1,8 +1,14 @@
-# A computer model simulating monthly gas consumption in a private house has been run at N=1000 different
-# choices of 8 model parameters. These are, for example, boiler efficiency, floor thickness, wall insulation, etc.
+###############################################################################
+
+# BACKGROUND: a computer model simulating monthly gas consumption in a private 
+# house has been run at N=1000 different choices of 8 model parameters (eg,
+# boiler efficiency, floor thickness, wall insulation, etc).
 # Observations of actual monthly consumption for the house are also available. 
 
-# This script explores the dataset of simulated gas consumption y, and identifies the main factors (and interactions
+# THIS SCRIPT: explores the dataset of simulated gas consumption y, and compares
+# with the observed values.
+
+#identifies the main factors (and interactions
 # thereof) which explain the variability in y. An emulator of the simulated consumption is then built: 
 # the emulator predicts the simulator response at any input and quantifies uncertainty around the prediction.
 

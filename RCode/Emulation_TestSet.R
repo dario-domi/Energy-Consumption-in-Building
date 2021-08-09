@@ -164,9 +164,9 @@ for (block in 1:N_loops){
   
 }
 
-##########################################
-##  THIS REPEATS ALL THE ABOVE, FOR MAY
-##########################################
+###########################################################################################
+##  THIS REPEATS ALL THE ABOVE, BUT FOR MAY (where 3rd order terms are usd in regression)
+###########################################################################################
 
 cat(sprintf("\n"))
 cat(sprintf("Now Starting May.\n"))

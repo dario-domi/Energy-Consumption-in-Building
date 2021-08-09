@@ -1,52 +1,64 @@
-setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
+###############################################################################
+#
+# This script loads the implausibility measures of max daily temperature on
+# summer months, and emulates them at a large sequence of inputs, loaded from
+# 'RData/Results/Eval.Inputs.RData'.
+#
+# Predictions are stored in 'RData/Results/Implaus_SummerMax_Emulators.RData',
+# and used in 'Main_Temperature_Analysis.R' to carry out history matching.
+#
+###############################################################################
 
+
+#####################################################################
+## SET FOLDER AND LOAD LIBRARIES
+
+setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode/RData/')
 library(openxlsx)
 library(leaps)
 library(fields)
-source('../../Emulation.R')
+source('../../../Emulation.R')
 
 
-################################################
-###### LOAD SEVERAL FUNCTIONS AND VARIABLES
-################################################
-
-source('Auxiliary_Scripts/Auxiliary_Functions.R')
-rm(Create.my.list, Cross_Val, Extract.Flat.Level)
+#####################################################################
+## LOAD VARIABLES AND DATASETS FROM PREVIOUSLY STORED .RData FILES
 
 # Design points
-source('Auxiliary_Scripts/Load_data.R')
-Design <- Rescale.Linearly(Design)
-rm(Outputs_gas, Obs_gas, month.names, Rescale.Linearly)
+load('Inputs/Design_Points.RData')
 
-# Optimised emulation parameters + Train-cross-test sets
-load('RData/Opt_Params_MaxSummerMonths.RData')
+# Implausibility Measures for daily max in Summer months
+load('Inputs/Implausibilities.RData')
 
-# Implausibility Measures for Max Summer months
-load('RData/Summer_Implausibilities.RData')
+# Optimised emulation parameters + Train-cross-test subdivision
+load('Results/Implaus_SummerMax_OptPars.RData')
 
 
-##############################################
-# PREDICT OVER LOTS OF POINTS
+#######################################################################
+# LARGE SEQUENCE OF INPUTS AT WHICH EMULATION WILL BE CARRIED OUT
 
-# Eval.points.full <- 2*sobol(N, dim = 8, scrambling = 1, seed = 2341) -1
-load('RData/Test_Inputs.RData') # loads Test.points.full
-Eval.points.full <- Test.points.full
-rm(Test.points.full)
-
-Eval.points <- Eval.points.full[1:1.e6, ]
+load('Results/Eval_Inputs.RData') # loads Eval.points.full
+Eval.points <- Eval.points.full[1:1.e5, ]
+rm(Eval.points.full)  # clean workspace
+invisible(gc())       # release memory
 
 
-###############################################################################
+#######################################################################
+## EMULATE IMPLAUSIBILITIES AT THE ABOVE INPUTS
+
+# The code below is repeated for each month and room
+
+
 
 ######################
-### JUNE, MASTER
+###  JUNE, MASTER  ###
 ######################
 
 # Linear regression
 subset.vars <- c(1,6)  # subset of variables whose powers will be used to select regressors
 Interactions <- poly(as.matrix(Design[,subset.vars]), degree=3)
 y.train <- Impl.Mast.Jun[train]
-L <- summary(regsubsets(y.train~., data=as.data.frame(Interactions[train,]), method = "forward", nvmax = 5))
+L <- summary(regsubsets(y.train~., data=as.data.frame(Interactions[train,]), 
+                        method = "forward", nvmax = 5))
 which(regr <- L$which[5,-1])            # logical vector with regressors corresponding to selected model
 fit <- lm(y.train~ ., data = as.data.frame(Interactions[train, regr ]))
 
@@ -73,17 +85,18 @@ Emul.Mast.Jun <- BL.Emul(Train.ActInp, Eval.ActInp, y.train,
                          sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
 
 
-###############################################################################
+##########################################
 
-######################
-### JUNE, KITCHEN
-######################
+#######################
+###  JUNE, KITCHEN  ###
+#######################
 
 # Linear regression
 subset.vars <- c(1,6,8)
 Interactions <- poly(as.matrix(Design[,subset.vars]), degree=3)
 y.train <- Impl.Kitch.Jun[train]
-L <- summary(regsubsets(y.train~., data=as.data.frame(Interactions[train,]), method = "forward", nvmax = 5))
+L <- summary(regsubsets(y.train~., data=as.data.frame(Interactions[train,]), 
+                        method = "forward", nvmax = 5))
 which(regr <- L$which[5,-1])            # logical vector with regressors corresponding to selected model
 fit <- lm(y.train~ ., data = as.data.frame(Interactions[train, regr ]))
 
@@ -110,17 +123,18 @@ Emul.Kitch.Jun <- BL.Emul(Train.ActInp, Eval.ActInp, y.train,
                           sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
 
 
-###############################################################################
+##########################################
 
 ######################
-### JULY, MASTER
+###  JULY, MASTER  ###
 ######################
 
 # Linear regression
 subset.vars <- c(3,6)
 Interactions <- poly(as.matrix(Design[, subset.vars]), degree=4)
 y.train <- Impl.Mast.Jul[train]
-L <- summary(regsubsets(y.train~., data=as.data.frame(Interactions[train,]), method = "forward", nvmax = 5))
+L <- summary(regsubsets(y.train~., data=as.data.frame(Interactions[train,]), 
+                        method = "forward", nvmax = 5))
 which(regr <- L$which[5,-1])            # logical vector with regressors corresponding to selected model
 fit <- lm(y.train~ ., data = as.data.frame(Interactions[train, regr ]))
 
@@ -140,20 +154,18 @@ sig2 <- sig2.Mast.Jul
 nu2 <- nu2.Mast.Jul
 d <- d.Mast.Jul
 
-system.time(
 Emul.Mast.Jul <- BL.Emul(Train.ActInp, Eval.ActInp, y.train, 
                          Regress.Design = Train.regr, 
                          Regress.Test = Eval.regr, 
                          beta = beta, Cov.beta = Cov.beta, 
                          sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
-)
 
 
-###############################################################################
+##########################################
 
-######################
-### JULY, KITCHEN
-######################
+#######################
+###  JULY, KITCHEN  ###
+#######################
 
 # Linear regression
 subset.vars <- c(6,8)
@@ -188,9 +200,9 @@ Emul.Kitch.Jul <- BL.Emul(Train.ActInp, Eval.ActInp, y.train,
 
 ###############################################################################
 
-######################
-### AUGUST, MASTER
-######################
+########################
+###  AUGUST, MASTER  ###
+########################
 
 # Linear regression
 subset.vars <- c(1,6)
@@ -216,20 +228,18 @@ sig2 <- sig2.Mast.Aug
 nu2 <- nu2.Mast.Aug
 d <- d.Mast.Aug
 
-system.time(
-  Emul.Mast.Aug <- BL.Emul(Train.ActInp, Eval.ActInp, y.train, 
+Emul.Mast.Aug <- BL.Emul(Train.ActInp, Eval.ActInp, y.train, 
                            Regress.Design = Train.regr, 
                            Regress.Test = Eval.regr, 
                            beta = beta, Cov.beta = Cov.beta, 
                            sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
-)
 
 
 ###############################################################################
 
-######################
-### AUGUST, KITCHEN
-######################
+#########################
+###  AUGUST, KITCHEN  ###
+#########################
 
 # Linear regression
 subset.vars <- c(6,8)
@@ -267,34 +277,7 @@ Emul.Kitch.Aug <- BL.Emul(Train.ActInp, Eval.ActInp, y.train,
 save(Emul.Mast.Jun, Emul.Kitch.Jun,
      Emul.Mast.Jul, Emul.Kitch.Jul,
      Emul.Mast.Aug, Emul.Kitch.Aug,
-     file = 'RData/Results_Temperature.RData')
-
-################################
-## NON-IMPLAUSIBLE REGIONS
-
-ind.M.Jun <- (Emul.Mast.Jun[,1] - 3*sqrt(Emul.Mast.Jun[,2]))<9
-ind.K.Jun <- (Emul.Kitch.Jun[,1] - 3*sqrt(Emul.Kitch.Jun[,2]))<9
-ind.M.Jul <- (Emul.Mast.Jul[,1] - 3*sqrt(Emul.Mast.Jul[,2]))<9
-ind.K.Jul <- (Emul.Kitch.Jul[,1] - 3*sqrt(Emul.Kitch.Jul[,2]))<9
-ind.M.Aug <- (Emul.Mast.Aug[,1] - 3*sqrt(Emul.Mast.Aug[,2]))<9
-ind.K.Aug <- (Emul.Kitch.Aug[,1] - 3*sqrt(Emul.Kitch.Aug[,2]))<9
-
-
-ind <- ind.M.Jun & ind.M.Jul & ind.M.Aug & ind.K.Jun & ind.K.Jul & ind.K.Aug
-
-plot(Eval.points[ind,6], Eval.points[ind,8],
-     cex =0.2, pch = 20, col='blue',
-     xlim = c(-1,1), ylim = c(-1,1)
-)
-points(Eval.points[ind,8], Eval.points[ind,6],
-       cex =0.4, pch = 20, col='blue',
-       xlim = c(-1,1), ylim = c(-1,1)
-)
-
-library("plot3D")
-subs <- 1:1.e5
-scatter2D(Eval.points[subs,8], Eval.points[subs,6], colvar = Emul.Kitch.Jul[subs], 
-          pch=20, cex=0.2)
+     file = 'RData/Results/Implaus_SummerMax_Emulators.RData')
 
 
 

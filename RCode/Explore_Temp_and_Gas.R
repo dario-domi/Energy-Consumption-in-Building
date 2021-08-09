@@ -6,12 +6,12 @@
 ################################################################################
 
 
-setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/')
+setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode/')
 
 library(openxlsx)
 library(leaps)
-source('Scripts/Auxiliary_Functions.R')
-source('../Emulation.R')
+source('Auxiliary_Scripts/Auxiliary_Functions.R')
+source('../../Emulation.R')
 
 
 #########################################
@@ -23,13 +23,16 @@ source('Auxiliary_Scripts/Load_data.R')
 Design <- Rescale.Linearly(Design)
 
 # Load N=1.e6 Test inputs and associated emulated gas predictions
-load('../RData/Test_Inputs.RData')
-load('../RData/Results_First_Million.RData') # loads
+load('RData/Test_Inputs.RData')
+load('RData/Results_First_Million_Gas.RData') # loads
+load('RData/Inputs/Simulated_and_Observed_Gas.RData')
 N <- dim(res1[[1]])[1]
 
 # Build matrix of Implausibility Measures for all observations (rows) and all months of interest (cols)
 month.indices <- c(1:5, 9:12)
 Global_IM <- matrix(nrow = N, ncol = length(month.indices))
+month.names <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 colnames(Global_IM) <- month.names[month.indices]
 
 Mod.Discr <- 0.1
@@ -37,7 +40,7 @@ Meas.Err <- 0.05
 for (i in month.indices){
   month <- month.names[i]
   X <- res1[[month]]
-  z <- Obs_gas[, month]
+  z <- Gas.Obs[, month]
   IM <- Compute_IM( X[,"Mean"], X[,"Var"], z, Mod.Discr, Meas.Err)
   Global_IM[, month] <- IM
   rm(X, IM)
@@ -98,7 +101,7 @@ hist(res1[[1]][ind.nomonth,"Mean"])
 # LOAD OBSERVED AND SIMULATED TEMPERATURES: hourly, for one year (8760 obs)
 ###############################################################################
 
-file <- "Data/Temperature_Data/Actual Space Temperatures - Dario.xlsx"
+file <- "../Data/Temperature_Data/Actual Space Temperatures - Dario.xlsx"
 Table <- read.xlsx(file)
 
 ## DATES AND TIMES
@@ -114,14 +117,16 @@ rm(file, Table)
 
 ## LOAD SIMULATED TEMPERATURES
 # Kitch.Sim & Master.Sim: 8760 x 1000
-load('RData/Simulated-Temperatures.RData')
+load('RData/Simulated-and-Observed-Temperatures.RData')
+
+# save(Kitch.Obs, Kitch.Sim, Mast.Obs, Mast.Sim, DateTimes, file = 'RData/Simulated-and-Observed-Temperatures.RData')
 
 
 ################################################################
 ##                       CODE FOR SOME PLOTS
 ################################################################
 
-# Observed time series (save plot)
+# Observed time series
 plot(DateTimes, Kitch.Obs, ty='l', col='blue', lwd=1, xaxt='n', ann = F)
 axis.POSIXct(side=1, x=DateTimes, format = "%d %b")       # format of x tick-labels
 
@@ -129,20 +134,27 @@ axis.POSIXct(side=1, x=DateTimes, format = "%d %b")       # format of x tick-lab
 # Plots of observed and simulated time-series (overlapped)
 times <- 3632:7295 # Jun-Oct
 times <- 2879:6550 # May-Sep
+times <- 1:200     # Jan
 times <- 1:length(DateTimes)
-while (T){
-  i <- ceiling(1000*runif(1))
-  plot(DateTimes[times], Kitch.Obs[times], ty='l', col=rgb(0,0,0, 0.6), ylim=c(13, 28))
-  lines(DateTimes[times], Kitch.Sim[times,i], ty='l', col=rgb(1,0,0, 0.6))
-  legend('topright', legend = i)
-  Sys.sleep(1)
+
+Obs <- Mast.Obs[times]
+Sim <- Mast.Sim[times,]
+Impl <- Impl.Mast.Jan
+
+
+while (T) {
+  i <- sample(1000, 1)
+  plot(DateTimes[times], Obs, ty='l', col='red', xaxt='n', ylim=c(14,21), lwd=1)
+  axis.POSIXct(side=1, x=DateTimes[times], format = "%d %b")      # format of x tick-labels
+  imp <- sqrt(Impl[i])
+  if (imp < 3)
+    lines(DateTimes[times], Sim[,i], ty='l', col='blue')
+  else
+    lines(DateTimes[times], Sim[,i], ty='l', col=rgb(0,0,1,0.6), lty=2)
+  legend('topright', legend = c(paste('Impl:', format(imp, digits = 3))) )
+  print(i)
+  Sys.sleep(1.5)
 }
-
-# Zooming
-zoom <- 700:1000
-plot(DateTimes[zoom], Kitch.Obs[zoom], ty='l', col = 'red', xaxt='n')
-axis.POSIXct(side=1, x=DateTimes[zoom], format = "%d %b") # read ?strptime for date format
-
 
 
 #################################################################
