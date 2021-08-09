@@ -16,3 +16,7 @@ RCode/Explore_elec_dataset.R
 
 # Ignore the following folder
 Z_Other_documents/
+
+# Single documents to be ignored
+Pictures/2nd\ Wave\ results.pptx
+RCode/Emulation_TestSet\ -\ Copy.R 
