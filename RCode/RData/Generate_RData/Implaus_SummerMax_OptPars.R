@@ -29,13 +29,8 @@ setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
 source('../../Emulation.R')
 source('Auxiliary_Scripts/Find_Optimal_Params.R')
 load('RData/Inputs/Design_Points.RData')
+load('RData/Inputs/SplitSet.RData')
 load('RData/Inputs/Implausibilities.RData')
-
-## Select training, validation and test sets
-set.seed(5879, kind = "default")
-train <- sample(1:1000, 750)
-valid <- sample((1:1000)[-train], 150)
-test <- (1:1000)[-c(train, valid)]
 
 Impl <- Impl.Mast.Jul
 y.train <- Impl[train]

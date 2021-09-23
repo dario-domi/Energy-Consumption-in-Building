@@ -23,8 +23,9 @@ source('../../../Emulation.R')
 #####################################################################
 ## LOAD VARIABLES AND DATASETS FROM PREVIOUSLY STORED .RData FILES
 
-# Design points
+# Design points and set split
 load('Inputs/Design_Points.RData')
+load('Inputs/SplitSet.RData')
 
 # Implausibility Measures for daily max in Summer months
 load('Inputs/Implausibilities.RData')

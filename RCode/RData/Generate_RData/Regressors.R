@@ -11,14 +11,8 @@
 setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
 library(leaps)                                          # Used to select best linear model
 load('RData/Inputs/Design_Points.RData')                # Design points, 1000x8
+load('RData/Inputs/SplitSet.RData')                     # Train, Evaluation and Test sets
 load('RData/Inputs/Simulated_and_Observed_Gas.RData')   # Gas consumptions
-
-
-# TRAIN AND VALIDATION SETS 
-rm(train, valid, test)
-set.seed(5879, kind = "default")
-train <- sample(1:1000, 800)
-valid <-(1:1000)[-train]
 
 
 # SELECT REGRESSORS
@@ -36,6 +30,7 @@ for (month in c(1:5, 9:12)){
   
   ind <- which.max(L$adjr2)                 # index (between 1 and nvmax) of model with max adj-R2
   Regressors[[month]] <- L$which[ind,-1]    # logical vector with regressors corresponding to selected model
+  
 }
 
 save(Regressors, file = 'RData/Inputs/Regressors.RData')
