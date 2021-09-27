@@ -33,6 +33,8 @@ for (month in c(1:5, 9:12)){
   
 }
 
+#fit <- lm(y.train ~ ., data = as.data.frame(Interactions.train[, Regressors[[month]] ]))
+
 save(Regressors, file = 'RData/Inputs/Regressors.RData')
 
 
