@@ -33,113 +33,129 @@ load('RData/Inputs/Simulated_and_Observed_Gas.RData')  # Gas data (observed and 
 load('RData/Inputs/Regressors.RData')                  # Regressors used in emulation
 source('Auxiliary_Scripts/Emulation_Parameters.R')     # Active Inputs and Correlation lengths for each month
 
+source('Auxiliary_Scripts/Auxiliary_Functions.R')      # Load function Create.my.list
+rm(Cross_Val, Extract.Flat.Level, Rescale.Linearly)
+
 
 ####################################################################
 # LOAD SOME EMULATION PARAMETERS AND BUILD NEW SET OF TEST POINTS 
 ####################################################################
 
-
 # Emulation will be carried out on the elements from N1 to N2 of Sobol sequence
-N1 <- 4800000                   # First and last index of sobol sequence...
-N2 <- N1+1000                   # ...on which emulation will be carried out
-N <- N2 - N1 + 1                # Total number of test points on which emulation will be carried out
+N1 <- 1.e6+1                   # First and last index of sobol sequence...
+N2 <- 1.1e6                # ...on which emulation will be carried out
+N <- N2 - N1 + 1          # Total number of test points on which emulation will be carried out
 
-# Generate N random points in the cube [-1,1]^Nvar
-N_var <- 8
-if (identical(N1,1)) {                                                                   # If N1=1:
-  Test.points.global <- 2*sobol(N, dim = N_var, scrambling = 1, seed = 2341) -1          #    take the first N points of the sequence
-} else {                                                                                 # Otherwise:
-  Test.points.global <- 2*sobol(N1-1, dim = N_var, scrambling = 1, seed = 2341) -1       #    generate the first N1-1 points
-  Test.points.global <- 2*sobol(N, dim = N_var, scrambling = 1, seed = 2341, init=F) -1  #    take the ones from N1 to N2
+## INTERACTIVE PART
+# Ask the user whether to create a new list to store the emulated values.
+# Only allowed answers are Y or N, and the length of the list. Question will be repeated otherwise. 
+# If Y, a further confirmation will be asked before proceeding.
+answer <- NA
+cat("Should a new empty list to store emulation results, 'Emul.Res', be created? (Y/N)\n", 
+    "If 'Y', you'll be able to input its length afterwards.", sep = "")
+answer <- readline()
+while ( !(answer %in% c("Y", "N")) ){
+  cat("Only type 'Y' for yes, 'N' for no.")
+  answer <- readline()
 }
-gc()       # releases memory
-colnames(Test.points.global) <- colnames(Design)
 
-# Alternatively: sample any N points in the cube [-1,1]^8 (uncomment following lines if needed)
-#N <- 100
-#N_var <- 8
-#Test.points.global <- matrix(2*runif(N*N_var)-1, nrow = N)
-#colnames(Test.points.global) <- colnames(Design)
+if (answer=="Y"){
+    cat("Warning. You chose Yes: if an object 'Emul.Res' already exists, it will be overwritten.\n",
+      "Press 'Y' to confirm your choice, anything else otherwise.", sep = "")
+  answer <- readline()
+}
 
-# Emulation will be carried out in blocks
-Block_size <- 1.e6                 # Maximum number of test points which will be emulated in each block
-N_loops <- ceiling(N/Block_size)   # Number of loops subsequently needed
+if (answer=="Y"){
+  cat("Type the desired length of the list, and press ENTER")
+  Lngt <- as.numeric(readline())
+  Emul.Res <- Create.my.list(Lngt, month.names, indices = c(1:5, 9:12), val = NA)
+}
 
-# If variable 'res' already exists, leave it to be able to append to it
-#if (!exists("res"))
-  res <- Create.my.list(N, month.names, indices = c(1:5, 9:12), val = NA)
 
-# Build a matrix of all 2-way interactions of factors (orthogonal polynomials of order 2) for design points
-Interactions.Design <- poly(data.matrix(Design), degree=2)
+# Set of Test inputs
+load('RData/Results_Emulation/Eval_Inputs.RData')        # loads Eval.points.full
+Test.points.global <- Eval.points.full[N1:N2, , drop=F]  # Subselect only inputs of interest
+rm(Eval.points.full)
+invisible(gc())                                                     # release memory
+
+
+# Build a matrix of all 2-way interactions (orthogonal polynomials of order 2) for training set
+Interactions.train <- poly(data.matrix(Design[train,]), degree=2)
 
 
 ##########################################################################
 # ACTUAL EMULATION: LOOP OVER THE DIFFERENT BLOCKS OF SIZE "Block_size"
 ##########################################################################
 
+# The subdivision in blocks allows to:
+# 1. Proceed "in parallel" among months (no month completed with a huge number
+# of emulated points while others are still to start); and
+# 2. Avoid the generation of all 2-way interactions for huge blocks
+# (only some of these interactions will be used).  
+
+# Emulation performed in blocks
+Block_size <- 1.e5                 # Maximum number of test points which will be emulated in each block, for all months
+N_loops <- ceiling(N/Block_size)   # Number of loops subsequently needed
+
 for (block in 1:N_loops){
   
   cat(sprintf("Starting block number %d out of %d:\n", block, N_loops))
   
   ind_start <- (block-1)*Block_size +1   # first index of current block
-  ind_end   <- min(block*Block_size, N)  # last index of current block
+  ind_end   <- min(block*Block_size, N)  #  last index of current block
   index     <- ind_start:ind_end
   
   # Test points in current block
-  Test.points.full <- Test.points.global[index, , drop=F]  # Block_size x N_var
+  Test.points.block <- Test.points.global[index, , drop=F]  # Block_size x N_var
   
   # Full set of regressors associated with test points in the block
-  Test.regr.full <- predict(Interactions.Design, newdata = Test.points.full)
+  All.Regr.block <- predict(Interactions.train, newdata = Test.points.block)  # Block_size x 44
   
-  for (month in c(1:4, 9:12) ){
+  for (month in c(1:5, 9:12) ){
     
     cat(sprintf("\t %s being computed.\n", month.names[month]))
     
-    y <- Outputs[, month]
-    ## The next line carries out lm's with different number of covariates, selecting best model of each size
-    ## (for fixed size, best model is the same regardless of criterion used - adjr2, Cp etc)
-    L <- summary(regsubsets(y~., data=Interactions.Design, method = "exhaustive", nvmax = 10))
-    ind <- which.max(L$adjr2)          # index (between 1 and nvmax) of model with max adj-R2
-    regr <- L$which[ind,-1]            # logical vector with regressors corresponding to selected model
-    fit <- lm(y~ ., data = as.data.frame(Interactions.Design[,regr]))
-    
-    # Mean and Variance of coefficients used in prior mean
+    # Linear Regression
+    y.train <- Gas.Sim[train, month]
+    regr <- Regressors[[month]]                 # logical vector with regressors to be used in lm
+    fit <- lm(y.train ~ ., data = as.data.frame(Interactions.train[, regr]))
     beta <- fit$coefficients
-    Cov.beta <- vcov(fit)
     
-    # Which of the 8 variables to use to build GP
-    GP_variables <- GP_inputs[[month]]
-    Design.points <- Design[, GP_variables, drop=F]         # design points used to train the emulator
-    Design.regr <- cbind(1, Interactions.Design[, regr, drop=F])   # regressors: add a column of 1s for intercept
+    # Active inputs and Correlation Lengths
+    Active.Inputs <- Act_inputs[[month]]              # Index of Active Inputs
+    N_Act <- length(Active.Inputs)                         
     
-    Test.points <- Test.points.full[, GP_variables, drop=F]
-    Test.regr <- cbind(1, Test.regr.full[, regr, drop=F])   # add a column of 1 for intercept
+    # Compute Active inputs and Regressors for Train and Test Sets
+    ActInp.Train <- Design[train, Active.Inputs, drop=F]          # Design points used to train the emulator, 700 x N_Act
+    ActInp.Test  <- Test.points.block[, Active.Inputs, drop=F]    # Test points: Block_size x N_Act
+    Regr.Train   <- cbind(1, Interactions.train[, regr, drop=F])  # Regressors, training: add a column of 1s for intercept
+    Regr.Test    <- cbind(1, All.Regr.block[, regr, drop=F])
+
+    # Prior correlation lengths and variances (explained and residual) used in the emulator
+    d <- Corr_lengths[month] * replicate(N_Act, 1)      # Correlation lengths
+    sigma2.tot <- var(fit$residuals)                    # Prior cumulative variance of homoschedastic Gaussian process
+    nugget <- 0.05                                      # Fraction of residual variability not explained by regressors
+    nu2 <- nugget*sigma2.tot                            # Variance of nugget term (Gaussian noise)
+    sig2 <- (1-nugget)*sigma2.tot                       # Variance of Gaussian process
     
-    N_var_GP <- length(GP_variables)
-    d <- Corr_lengths[month]* replicate(N_var_GP, 1)         # Correlation lengths
-    sigma2.tot <- var(fit$residuals)                        # Prior cumulative variance of homoschedastic Gaussian process
-    nugget <- 0.05                                          # Fraction of residual variability not explained by regressors
-    nu2 <- nugget*sigma2.tot                                 # Variance of nugget term (Gaussian noise)
-    sig2 <- (1-nugget)*sigma2.tot                           # Variance of Gaussian process
-    
-    # Call the function which carries out  Bayes Linear Emulation, on the selected regressors given observed output y
-    res.block <- BL.Emul(Design.points, Test.points, y, 
-                            Regress.Design = Design.regr, 
-                            Regress.Test = Test.regr, 
-                            beta = beta, Cov.beta = Cov.beta, 
-                            sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
+    # Call the function performing Bayes Linear Emulation, on the selected regressors given observed output y
+    res.block <- BL.Emul(ActInp.Train, ActInp.Test, y.train, 
+                         Regress.Design = Regr.Train, 
+                         Regress.Test = Regr.Test, 
+                         beta = beta,
+                         sigma2 = sig2, kernel = 'exp2', d = d, nu2 = nu2)
 
     # Store the results for this block and this month
-    res[[month]][index, ] <- res.block
-    
+    Emul.Res[[month]][N1-1+index, ] <- res.block
+
     # Release memory (otherwise it won't get released despite using same name for some variables)
-    gc()
+    invisible(gc())
   }
   
   cat(sprintf("\n"))
   if ( identical(block%%4,0) | (block == N_loops) ){
     cat(sprintf("Saving results for block %d of %d ...\n", block, N_loops))
-    #save(res, file = "Results_61-100.RData", version = 2, compress = "xz")
+    save(Emul.Res, file = "RData/Results_Emulation/Gas_Emulation_Results.RData")
     cat(sprintf("Results saved.\n\n"))
   }
   
