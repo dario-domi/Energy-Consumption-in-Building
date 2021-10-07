@@ -308,6 +308,185 @@ The red ``cat's eye'' boxes represent the emulator predictions for these points,
 
 
 
+\section{History Matching}
+
+The emulators built and validated in previous sections allow to predict, for any input $\x \in \R^8$, the simulated gas consumption $f(\x)$ associated with that set of inputs.
+Since observed gas consumptions are available for each month, we can use the emulators to select inputs $\x$ whose simulated gas consumptions are ``compatible'' with the observed data.
+The context and notation to carry out the comparison are introduced below. 
+
+
+\subsection{Notation and Choices}
+Let $f(\x)$ denote the simulated gas consumption associated with input $\x$. With a slight abuse of notation which should however cause no confusion, we denote by $\E[f(\x)]$ and $\Var[f(\x)]$ the emulator mean prediction and variance associated with input $\x$. Finally, we denote by $z \in \R$ the observed gas consumption. Note that, albeit not explicitly signalled in the notation, all these quantities depend on the particular month considered.
+
+
+When using the emulator to assess the compatibility between the (unknown) value $f(\x)$ corresponding to a given input $\x$, and the available observed consumption $z$, we need to account for at least three different types of uncertainties.
+\begin{enumerate}
+ \item The emulator prediction is only an approximation to the actual model response
+       $f(\x)$: this uncertainty is naturally quantified by the emulator standard deviation associated with the prediction.
+ \item Even if the emulator were a perfect reproduction of the simulator, the latter
+       would only be an imperfect reproduction of reality. We ultimately want to learn about the real world, so model discrepancy (MD) should be accounted for.
+ \item Due to unavoidable measurement errors (MEs), the observed consumption $z$
+       differs from the actual amount of gas consumed in the building during the month.
+\end{enumerate}
+
+The aim of the first wave of emulators is to discard those inputs $\x$ which, once the previous uncertainties are accounted for, are extremely unlikely to lead to gas consumption $z$ in the real world. In order to quantify the mismatch between an input $\x \in \R^8$ and the observed $z$ for the month $M$, we consider the following implausibility measure\footnote{
+I don't add much here, but clearly in a paper we would reference Michael's work and possibly restructure the exposition.}:
+\begin{equation}
+ I_M(\x) = \frac{\big|\, \E[f(\x)] - z \,\big| }{ \sqrt{
+ {\Var[f(\x)]}^{\phantom{i}} \!+ \Var[\epsilon_{_\text{MD}}(\x)] + \Var[\epsilon_{_\text{ME}}(z)] \,}^{\,}
+       } \,, \;\quad \x \in \R^8.
+\end{equation}
+The subscript $M$ denotes the dependence on the month considered (it is omitted from the terms on the right-hand side for simplicity of notation).
+The quantity $I_M(\x)$ is dimensionless. The last two terms of the denominator represent the uncertainty ascribed to model discrepancy and measurement errors respectively, and have the same dimension as $\Var[f(\x)]$.
+
+
+In our case, we assess the measurement error to be of the order of $5\%$ of the reported gas consumption $z$. To translate this into a value for $\Var[\epsilon_{_\text{ME}}]$, we
+make the simplifying assumption that the actual consumption has uniform probability of being anywhere in the interval $[0.975 z, 1.025 z]$. Since the variance of a uniform random variable on an interval of length $L$ is $L^2/12$, this assumption yields:
+\begin{equation}
+ \Var[\epsilon_{_\text{ME}}(z)] = \frac{z^2}{\,4800\,}\,.
+\end{equation}
+
+As far as model discrepancy is concerned, we consider three different scenarios, where the discrepancy between a simulated output $y$ and reality is estimated in about $5\%$, $10\%$ and $20\%$ of $y$ respectively. Since the output $y$ is not available for a general input $\x$, we consider the quantity $\E[f(\x)]$ as its surrogate, therefore computing $\Var[\epsilon_{_\text{MD}}(\x)]$
+as
+\begin{equation}
+\frac{ \,{\E[f(\x)]}^2\, }{4800}\,, \;
+\frac{ \,{\E[f(\x)]}^2\, }{1200}\,, \;
+\frac{ \,{\E[f(\x)]}^2\, }{300}
+\end{equation}
+in the three scenarios respectively.
+
+
+
+For the month $M$, we define an input $\x$ as ``non-implausible for $M$'' if the value $I_M(\x)$ is lower than a given threshold $T$. Hence, it is natural to define an input as ``non-implausible'' if the previous condition holds true for all the months. That is, if
+\begin{equation}\label{Condition}
+\max_{M \in \mathcal{M}} \big\{ I_M(\x) \big\} < T\,,
+\end{equation}
+where $\mathcal{M}$ is the set of nine months considered in this work. Since the previous equation represents the simultaneous imposition of nine conditions, we consider two fairly conservative values of $T$ in equation~\eqref{Condition}: $T=4$ and $T=5$.
+
+
+\subsection{Results}
+
+\begin{table}
+ \centering
+ \renewcommand{\arraystretch}{1.6}
+ \setlength{\tabcolsep}{0.9ex}
+ \caption{Percentages of non-implausible space when accounting for different size 
+          of model discrepancy (MD). Results shown for two different values of the threshold $T$. In the ``All'' column, condition~\eqref{Condition} is used to classify a point as non-implausible.
+          The looser condition $I_\text{M}(\x)<T$ is instead used in each of the remaining nine columns, for the different months ``M''
+          (percentages rounded to the nearest integer). The ``$\approx 0$'' value in the table corresponds to $2.23 \times 10^{-6} \,\%$ of the space.
+          }
+ \begin{tabular}{c<{\hspace{2ex}} r<{\hspace{2ex}} ccccccccc}
+ \specialrule{0.1em}{0em}{0.1em}
+      & {\bf All} & {\bf Jan} & {\bf Feb} & {\bf Mar} & {\bf Apr} & {\bf May} & {\bf Sep} & {\bf Oct} & {\bf Nov} & {\bf Dec} \\
+ \specialrule{0.05em}{0.1em}{0.1em}
+ \specialrule{0.05em}{0em}{0.5em}
+ \multirow{3}{*}{$T=4 \;\left\{ \begin{array}{r}
+                                  5\% \text{ MD} \\
+                                 10\% \text{ MD} \\
+                                 20\% \text{ MD} 
+                                \end{array}\right. $}    
+                             & 0$\;\;$ & 24 & 24 & 21 & 13 & 14 & 26 & 20 & 19 & 22 \\
+                             &   0.30  & 38 & 38 & 33 & 21 & 22 & 45 & 31 & 30 & 36 \\
+                             & 19.52   & 70 & 69 & 63 & 39 & 42 & 81 & 59 & 57 & 67 \\
+ \specialrule{0.05em}{0.5em}{0.5em}
+ \multirow{3}{*}{$T=5 \;\left\{ \begin{array}{r}
+                                  5\% \text{ MD} \\
+                                 10\% \text{ MD} \\
+                                 20\% \text{ MD} 
+                                \end{array}\right. $}    
+                         & $\approx 0$ & 30 & 30 & 26 & 16 & 18 & 35 & 25 & 24 & 28 \\
+                         &    3.31     & 47 & 48 & 42 & 26 & 28 & 58 & 39 & 38 & 45 \\
+                         &   37.02     & 84 & 81 & 78 & 50 & 54 & 92 & 74 & 72 & 82 \\ 
+  \specialrule{0.1em}{0.5em}{0em}
+\end{tabular}
+ \label{Table_Implausibility}
+\end{table}
+
+
+\renewcommand{\scale}{18.8em}
+\begin{figure}
+\centering
+ \includegraphics[width=\scale]{Gas_Compatibility/Min_Impl/minImpl_MD=10_x=1_y=6}
+ \includegraphics[width=\scale]{Gas_Compatibility/Min_Impl/minImpl_MD=10_x=8_y=6}\\
+ \hspace{\scale}
+  \includegraphics[width=\scale]{Gas_Compatibility/Min_Impl/minImpl_MD=10_x=8_y=1}
+ \caption{10\% Model discrepancy}
+ \label{Fig_Min_Implaus_10MD}
+\end{figure}
+
+\begin{figure}
+\centering
+ \includegraphics[width=\scale]{Gas_Compatibility/Min_Impl/minImpl_MD=20_x=1_y=6}
+ \includegraphics[width=\scale]{Gas_Compatibility/Min_Impl/minImpl_MD=20_x=8_y=6}\\
+ \hspace{\scale}
+  \includegraphics[width=\scale]{Gas_Compatibility/Min_Impl/minImpl_MD=20_x=8_y=1}
+ \caption{20\% model discrepancy}
+ \label{Fig_Min_Implaus_20MD}
+\end{figure}
+
+\begin{figure}
+\centering
+ \includegraphics[width=\scale]{Gas_Compatibility/Opt_Depth/Depth_MD=10_x=1_y=6}
+ \includegraphics[width=\scale]{Gas_Compatibility/Opt_Depth/Depth_MD=10_x=8_y=6}\\
+ \hspace{\scale}
+  \includegraphics[width=\scale]{Gas_Compatibility/Opt_Depth/Depth_MD=10_x=8_y=1}
+ \caption{}
+ \label{Fig_Opt_Depth_10MD}
+\end{figure}
+
+
+\begin{figure}
+\centering
+ \includegraphics[width=\scale]{Gas_Compatibility/Opt_Depth/Depth_MD=20_x=1_y=6}
+ \includegraphics[width=\scale]{Gas_Compatibility/Opt_Depth/Depth_MD=20_x=8_y=6}\\
+ \hspace{\scale}
+ \includegraphics[width=\scale]{Gas_Compatibility/Opt_Depth/Depth_MD=20_x=8_y=1}
+ \caption{}
+ \label{Fig_Opt_Depth_20MD}
+\end{figure}
+
+
+In order to explore the compatibility between different regions of the space and the observed data, we generate a Sobol quasi-random sample of $N = 10^7$ points in the 8-dimensional cube $C={[-1,1]}^8$.
+
+
+We start by examining the results when $T=4$.
+In the case where only $5\%$ model discrepancy (MD) is considered, none of the 10 million points is classified as non-implausible according to condition~\eqref{Condition}. Further inspection also reveals that no point can be found which matches any eight of the nine months simultaneously.
+However, by accounting for larger model discrepancy, non-implausible inputs can be found: they constitute $0.33\%$ of the space when $10\%$ MD is accounted for, and $19.5\%$ of the space when MD is increased to $20\%$.
+
+
+
+
+
+In~\autoref{Table_Implausibility} we report these percentages, together with the percentages of space which are deemed non-implausible when compatibility with a single month is imposed. The percentages corresponding to the case $T=5$ are also shown. We see that the non-implausible fraction of space corresponding to a $5\%$ MD is essentially zero also in the $T=5$ case. If we accept that observed consumptions come with a measurement error of at most $5\%$, then this suggests that the discrepancy between the simulator and reality is likely to be higher than $5\%$.
+
+
+As easily foreseeable from the plots of~\autoref{Fig_Output_Hist}, \autoref{Table_Implausibility} reveals that notable parts of the space result non-implausible when compared with the observation of a single month, although the insersection of these parts of the space may be (almost) empty, as in the two $5\%$ MD cases. With the exception of these two rows, however, we can notice the following: the fraction of non-implausible space is about 2 orders of magnitude higher than the product of non-implausible fractions with respect to the single months. This suggests indeed that the nine conditions imposed in equation~\eqref{Condition} are not independent of each other, but rather positively correlated.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
