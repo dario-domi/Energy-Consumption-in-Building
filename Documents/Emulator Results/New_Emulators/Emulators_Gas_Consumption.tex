@@ -462,9 +462,32 @@ In~\autoref{Table_Implausibility} we report these percentages, together with the
 
 As easily foreseeable from the plots of~\autoref{Fig_Output_Hist}, \autoref{Table_Implausibility} reveals that notable parts of the space result non-implausible when compared with the observation of a single month, although the insersection of these parts of the space may be (almost) empty, as in the two $5\%$ MD cases. With the exception of these two rows, however, we can notice the following: the fraction of non-implausible space is about 2 orders of magnitude higher than the product of non-implausible fractions with respect to the single months. This suggests indeed that the nine conditions imposed in equation~\eqref{Condition} are not independent of each other, but rather positively correlated.
 
+\section{Sensitivity Analysis}
 
-
-
+\begin{table}
+% \centering
+ \renewcommand{\arraystretch}{1.4}
+ \newcommand{\colsep}{1ex}
+ \caption{Sensitivity analysis results, using the Standardised Regression Coefficient (SRC) as measure.
+ For easier reading, an SRC in modulus lower than 0.05 is shown as ``--''.}
+ \hspace{-2.6cm}
+ \begin{tabular}{c<{\hspace{\colsep}}  cccccccccccc}
+\specialrule{.1em}{0em}{0.1em} 
+ \textbf{Input} & \textbf{Jan} & \textbf{Feb} & \textbf{Mar} & \textbf{Apr} & \textbf{May} & \textbf{Jun} & \textbf{Jul} & \textbf{Aug} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Dec}   \\
+ \specialrule{.05em}{.1em}{0.1em} 
+ \specialrule{.05em}{0em}{0.2em} 
+   Heating Setpoint                  &  0.31 & 0.34 & 0.35 & 0.36 & 0.42 & -0.07 & -- & -- & 0.30 & 0.45 & 0.36 & 0.34   \\
+   Boiler Efficiency                   &  -0.25 & -0.22 & -0.20 & -0.15 & -0.11 & -- & -- & -- & -0.08 & -0.18 & -0.23 & -0.26 \\
+   External wall thickness       &  -0.10 & -0.09 & -0.08 & -0.06 & -0.05 & -- & -- & -- & -0.06 & -0.08 & -0.09 & -0.010  \\
+   Roof quilt thickness            &  -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+   Floor insulation thickness &  -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & --  \\
+   Infiltration rate                    & 0.92 & 0.92 & 0.92 & 0.92 & 0.89 & 0.43 & 0.41 & 0.37 & 0.76 & 0.87 & 0.91 & 0.91 \\
+   DHW Consumption             &   -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+   Cooking                                 &  -- & -- & -- & -- & -- & 0.87 & 0.89 & 0.90 & 0.55 & -- & -- & --      \\
+ \specialrule{.1em}{0.2em}{1em} 
+ \end{tabular}
+\label{Table_Sensitivity_Analysis}
+\end{table}
 
 
 
