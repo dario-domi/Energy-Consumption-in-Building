@@ -4,9 +4,6 @@
 # Ignore all .RData files in (or below) folder RData 
 #RData/**/*.RData
 
-# Ignore Explore_elec_dataset.R
-RCode/Explore_elec_dataset.R
-
 # Ignore all automatically generated files from latex
 *.aux
 *.log
@@ -14,11 +11,21 @@ RCode/Explore_elec_dataset.R
 *.toc
 *.synctex.gz 
 
-# Ignore the following folder
+# Ignore the following folders
 Z_Other_documents/
+Documents/Paper_Literature
 
-# Single documents to be ignored
+# Single files to be ignored
 Pictures/2nd\ Wave\ results.pptx
 RCode/Emulation_TestSet\ -\ Copy.R 
 Documents/Emulator Results/New_Emulators/Emulators_Gas_Consumption_Hailiang_Comments.pdf
 RCode/RData/Results_First_Million_Gas.RData
+RCode/Explore_elec_dataset.R
+Documents/FlowChart.pdf
+Documents/FlowChart.jpg
+Documents/A\ Bayesian\ model\ proposal\ for\ building\ model\ uncertainty\ analysis\ -\ Dario.docx
+Documents/A\ Bayesian\ model\ proposal\ for\ building\ model\ uncertainty\ analysis\ -\ V15\ -\ Towards\ submission.docx
+
+
+
+
