@@ -1,7 +1,11 @@
 ###############################################################################
 #
-# Builds linear regressions for the monthly gas consumptions by selecting the 
-# "best" regressors among choices of quadratic terms of the 8 inputs
+# Given three vectors of indices between 1 and 1000 (train, eval and test: meant
+# to be disjoint, albeit not strictly necessary), the script evaluates the 
+# emulator(s) built on train, on the eval and test sets. Hyperparameters for
+# each emulator are loaded from separate scripts.
+#
+# For associated plots see Pictures/Validation_Plots/Validation_Plots.R.
 #
 ###############################################################################
 

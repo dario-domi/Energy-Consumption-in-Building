@@ -14,6 +14,8 @@
 # Ignore the following folders
 Z_Other_documents/
 Documents/Paper_Literature
+RCode/Additional_Code
+
 
 # Single files to be ignored
 Pictures/2nd\ Wave\ results.pptx
