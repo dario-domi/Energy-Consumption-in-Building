@@ -16,18 +16,31 @@
 # (this is to avoid memory problems, eg when generating all 2-way interactions)
 
 ###########################################################################################################
+# Preliminary: to check how many points 'Emul.Res' contains results for
+#for (i in 1:12){
+#  cat("Number of emulated points for ", month.names[i], ": ",  sum(!is.na(Emul.Res[[i]][,1])), "\n", sep = "")
+#}
+############################################################################################################
+
 
 #####################################################
 # SET DIRECTORY AND LOAD LIBRARIES/CUSTOM FUNCTIONS
 #####################################################
 
 # SET FOLDER AND LOAD NEEDED FUNCTIONS/DATA
-setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
+#setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
+
+#load('RData/Results_Emulation/Gas_Emulation_Results.RData') # Emulation results (Emul.Res)
 
 source('../../Emulation.R')                            # Function to perform emulation
 
 load('RData/Inputs/Design_Points.RData')               # Design Points
 load('RData/Inputs/SplitSet.RData')                    # Training, Evaluation, Test sets
+load('RData/Results_Emulation/Eval_Inputs.RData')        # loads Eval.points.full
+#Eval.points.full[,1] <- 2*Eval.points.full[,1] - 1
+#Eval.points.full[,6] <- 1.2*Eval.points.full[,6]
+#Eval.points.full[,8] <- 1.5*Eval.points.full[,8] + 1.5
+
 load('RData/Inputs/Simulated_and_Observed_Gas.RData')  # Gas data (observed and simulated)
 
 load('RData/Inputs/Regressors.RData')                  # Regressors used in emulation
@@ -42,9 +55,10 @@ rm(Cross_Val, Extract.Flat.Level, Rescale.Linearly)
 ####################################################################
 
 # Emulation will be carried out on the elements from N1 to N2 of Sobol sequence
-N1 <- 1.e6+1                   # First and last index of sobol sequence...
-N2 <- 1.1e6                # ...on which emulation will be carried out
-N <- N2 - N1 + 1          # Total number of test points on which emulation will be carried out
+N1 <- 5e6 + 1         # First and last index of sobol sequence...
+N2 <- 6e6               # ...on which emulation will be carried out
+N <- N2 - N1 + 1        # Total number of test points on which emulation will be carried out
+
 
 ## INTERACTIVE PART
 # Ask the user whether to create a new list to store the emulated values.
@@ -73,11 +87,9 @@ if (answer=="Y"){
 
 
 # Set of Test inputs
-load('RData/Results_Emulation/Eval_Inputs.RData')        # loads Eval.points.full
 Test.points.global <- Eval.points.full[N1:N2, , drop=F]  # Subselect only inputs of interest
 rm(Eval.points.full)
-invisible(gc())                                                     # release memory
-
+invisible(gc())                                          # release memory
 
 # Build a matrix of all 2-way interactions (orthogonal polynomials of order 2) for training set
 Interactions.train <- poly(data.matrix(Design[train,]), degree=2)
@@ -153,7 +165,7 @@ for (block in 1:N_loops){
   }
   
   cat(sprintf("\n"))
-  if ( identical(block%%4,0) | (block == N_loops) ){
+  if ( identical(block%%3,0) | (block == N_loops) ){
     cat(sprintf("Saving results for block %d of %d ...\n", block, N_loops))
     save(Emul.Res, file = "RData/Results_Emulation/Gas_Emulation_Results.RData")
     cat(sprintf("Results saved.\n\n"))
