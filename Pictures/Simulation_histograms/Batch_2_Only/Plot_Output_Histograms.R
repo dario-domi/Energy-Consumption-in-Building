@@ -40,7 +40,7 @@ myplot <- function(sim, obs, fac, l_wdt){
   # If only one sim value, plot a vertical line for it. Otherwise histogram
   if (length(sim)==1){
     hist(0, xlim = rg, main="", xlab="", ylab="")  # empty histogram 
-    abline(v=sim, col=col_hist, lwd=l_wdt, lty=2)  # add vertical line at simulated value
+    abline(v=sim, col=col_hist, lwd=l_wdt, lty=1)  # add vertical line at simulated value
   }
   else{
     hist(sim, breaks=nbin[month], xlim=rg, col=col_hist, 
@@ -70,9 +70,10 @@ nbin <-  c(15,16,15,15,14, 8, 9,15,15,15,15,15)
 file.name <- 'Simulation_histograms/Batch_2_Only/Gas_Runs/All_months_gas.png'
 ln = 1.3                     # distance between title and plot box
 
-png(file.name, width = 8, height = 6, unit="in", res=288)
-par(mfrow=c(3,4), 
-    mai=c(0.5, 0.6, 0.3, 0), # for each subplot: bott, left, top, right margins
+png(file.name, width = 12, height = 4, unit="in", res=288)
+par(mfrow=c(2,6), 
+    cex.lab = 1.2, cex.axis =1.2, cex.main = 1.4,
+    mai=c(0.5, 0.5, 0.3, 0.1), # for each subplot: bott, left, top, right margins
     mgp = c(2.8,1,0)         # mgp[1] = dist label-axis; mgp[2] = dist numbers-axis; 
                              # mgp[3] = dist axis line from plot box. Default: 3,1,0
 )
@@ -87,11 +88,11 @@ for (month in 1:12){
   title( paste(month.name[month], 'Gas'), line = ln)    # Title
   
   # If one of the left-most plots, add y-label
-  if (month%%4 == 1){
+  if (month%%6 == 1){
     title(ylab = "Frequency")
   }
   # If last row, add x-label
-  if (month>8.5){
+  if (month>6.5){
     title(xlab = "Gas consumption [kWh]")
   }
 }
@@ -139,13 +140,14 @@ summer <- c(6,7,8)  # June, July, August
 
 
 #################################################
-# 3x4 PLOT WITH ELEC HISTOGRAMS FOR ALL MONTHS
+# 6x2 PLOT WITH ELEC HISTOGRAMS FOR ALL MONTHS
 
 file.name <- 'Simulation_histograms/Batch_2_Only/Elec_Runs/All_months_elec.png'
 
-png(file.name, width = 8, height = 6, unit="in", res=288)
-par(mfrow=c(3,4), 
-    mai=c(0.5, 0.6, 0.3, 0), # for each subplot: bott, left, top, right margins
+png(file.name, width = 12, height = 4, unit="in", res=288)
+par(mfrow=c(2,6),
+    cex.lab = 1.2, cex.axis =1.2, cex.main = 1.4,
+    mai=c(0.5, 0.5, 0.3, 0.1), # for each subplot: bott, left, top, right margins
     mgp = c(2.8,1,0)         # mgp[1] = dist label-axis; mgp[2] = dist numbers-axis;
                              # mgp[3] = dist axis line from plot box. Default: 3,1,0
 )
@@ -165,11 +167,11 @@ for (month in 1:12){
   title( paste(month.name[month], 'Elec'), line = ln)    # Title
   
   # If one of the left-most plots, add y-label
-  if (month%%4 == 1){
+  if (month%%6 == 1){
     title(ylab = "Frequency")
   }
   # If last row, add x-label
-  if (month>8.5){
+  if (month>6.5){
     title(xlab = "Elec consumption [kWh]")
   }
 }
