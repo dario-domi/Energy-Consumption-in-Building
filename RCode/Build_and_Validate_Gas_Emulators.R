@@ -14,10 +14,15 @@ setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
 
 library(leaps)
 load('RData/Inputs/Design_Points.RData')               # Design Points
-load('RData/Inputs/SplitSet.RData')                    # Training, Evaluation, Test sets
 load('RData/Inputs/Simulated_and_Observed_Gas.RData')  # Gas data (observed and simulated)
 source('../../Emulation.R')                            # Script to carry out Emulation
 
+# Either load pre-defined subdivision, or build new one
+# load('RData/Inputs/SplitSet.RData')                  # Training, Evaluation, Test sets
+# set.seed(8219, kind = "default")  # 5879, 6321
+# train <- sort(sample(1000, 100))
+# eval <- sort( sample( (1:1000)[-train],50) )
+# test <- (1:1000)[-c(train, eval)]
 
 ###############################################################################
 # BUILD EMULATORS AND PREDICT VALUES ON VALIDATION AND TEST SETS

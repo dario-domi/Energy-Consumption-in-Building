@@ -1,8 +1,9 @@
 #############################################################################
 #
-# For both gas and electricity, a 3x4 plot with histograms of the 1000 simulated
-# consumptions for each month is produced. A vertical line is added at the 
+# For both gas and electricity, a NrxNc plot is produced, with histograms of the 
+# 1000 simulated consumptions in each month. A vertical line is added at the 
 # observed consumption.
+#
 # Moreover, 12 plots of the single histograms are produced.
 #
 # This script and the pictures produced (in png/pdf) can be found at:
@@ -65,13 +66,17 @@ nbin <-  c(15,16,15,15,14, 8, 9,15,15,15,15,15)
 
 
 #################################################
-# 3x4 PLOT WITH GAS HISTOGRAMS FOR ALL MONTHS
+# GRID PLOT WITH GAS HISTOGRAMS FOR ALL MONTHS
 
-file.name <- 'Simulation_histograms/Batch_2_Only/Gas_Runs/All_months_gas.png'
+Nr <- 3  # number of rows of grid plot
+Nc <- 4  # number of columns of grid plot
+
+file.name <- paste('Simulation_histograms/Batch_2_Only/Gas_Runs/All_months_gas_',
+                   Nr, 'x', Nc, '.png', sep="")
 ln = 1.3                     # distance between title and plot box
 
-png(file.name, width = 12, height = 4, unit="in", res=288)
-par(mfrow=c(2,6), 
+png(file.name, width = 2*Nc, height = 2*Nr, unit="in", res=288)
+par(mfrow=c(Nr,Nc), 
     cex.lab = 1.2, cex.axis =1.2, cex.main = 1.4,
     mai=c(0.5, 0.5, 0.3, 0.1), # for each subplot: bott, left, top, right margins
     mgp = c(2.8,1,0)         # mgp[1] = dist label-axis; mgp[2] = dist numbers-axis; 
@@ -88,11 +93,11 @@ for (month in 1:12){
   title( paste(month.name[month], 'Gas'), line = ln)    # Title
   
   # If one of the left-most plots, add y-label
-  if (month%%6 == 1){
+  if (month%%Nc == 1){
     title(ylab = "Frequency")
   }
   # If last row, add x-label
-  if (month>6.5){
+  if (month> 12-Nc){
     title(xlab = "Gas consumption [kWh]")
   }
 }
@@ -140,12 +145,16 @@ summer <- c(6,7,8)  # June, July, August
 
 
 #################################################
-# 6x2 PLOT WITH ELEC HISTOGRAMS FOR ALL MONTHS
+# GRID PLOT WITH ELEC HISTOGRAMS FOR ALL MONTHS
 
-file.name <- 'Simulation_histograms/Batch_2_Only/Elec_Runs/All_months_elec.png'
+Nr <- 3  # number of rows of grid plot
+Nc <- 4  # number of columns of grid plot
 
-png(file.name, width = 12, height = 4, unit="in", res=288)
-par(mfrow=c(2,6),
+file.name <- paste('Simulation_histograms/Batch_2_Only/Elec_Runs/All_months_elec_',
+                   Nr, 'x', Nc, '.png', sep="")
+
+png(file.name, width = 2*Nc, height = 2*Nr, unit="in", res=288)
+par(mfrow=c(Nr,Nc),
     cex.lab = 1.2, cex.axis =1.2, cex.main = 1.4,
     mai=c(0.5, 0.5, 0.3, 0.1), # for each subplot: bott, left, top, right margins
     mgp = c(2.8,1,0)         # mgp[1] = dist label-axis; mgp[2] = dist numbers-axis;
@@ -167,11 +176,11 @@ for (month in 1:12){
   title( paste(month.name[month], 'Elec'), line = ln)    # Title
   
   # If one of the left-most plots, add y-label
-  if (month%%6 == 1){
+  if (month%%Nc == 1){
     title(ylab = "Frequency")
   }
   # If last row, add x-label
-  if (month>6.5){
+  if (month>12-Nc){
     title(xlab = "Elec consumption [kWh]")
   }
 }
