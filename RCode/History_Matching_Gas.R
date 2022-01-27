@@ -1,6 +1,10 @@
+################################################################################
+
 # This script loads the results (means and variances) of emulated monthly gas
 # consumption at a large set of test inputs. It then computes the implausibility 
 # measure associated with each input, for each month.
+
+# Minimum_Implausibility and Optical Depth plots are produced.
 
 ################################################################################
 
@@ -29,7 +33,7 @@ rm(BL.Emul, Corr.fun)
 
 # Indeces between which IM will be computed
 N1 <- 1
-N2 <- 3e6
+N2 <- 6e6
 N <- N2-N1+1   # total number of points for which IM is computed
 Eval.points.full <- Eval.points.full[N1:N2,]
 invisible(gc())
@@ -51,6 +55,7 @@ for (i in month.indices){
   rm(X, IM)
   invisible(gc())
 }
+#Global_IM <- Global_IM[, -6]
 
 #############################################################
 # ANALYSE RESULTS AND PRODUCE SOME PLOTS
@@ -96,83 +101,132 @@ scatter2D(Eval.points.full[subs,c1], Eval.points.full[subs,c2], colvar = (sqrt(E
           pch=20, cex=0.2)
 
 
+# PAIRS SCATTER PLOT (8X8)
+k <- 5e5
+X <- Eval.points.full[1:k, ]
+X <- X[gas.compat[1:k],]
+invisible(gc())
+pairs(X, pch=16, cex=0.5, xlim=c(-1,1), ylim=c(-1,1))
+
+
+
+
 #############################################
 # 2D DEPTH PLOTS OF IMPLAUSIBILITY MEASURE
 #############################################
 
-source('CrossSec.R') # custom function
+source('CrossSec.R') # custom function to compute matrix
 library(plotly)      # to produce contour plots
 
 # vals[i] is the max Implausibility over months, for input i
 vals <- apply(abs(Global_IM), 1, max)
+invisible(gc())
 #val <- t(apply(abs(Global_IM[1:10000,]), 1, sort))   # matrix, in each row implausibilities are sorted in ascending order
 
+
 # MINIMUM IMPLAUSIBILITY PLOT
-c1 <- 8
-c2 <- 6
-system.time(min.Impl <- Cross.Sect(Eval.points.full, vals, c1, c2, min))
-fig1 <- plot_ly(
-  type = 'contour',
-  x = min.Impl[[1]],
-  y = min.Impl[[2]],
-  z = min.Impl[[3]],
-  contours = list(coloring = 'heatmap'),
-  line = list(smoothing=0, width = 1)
-)
+dims <- c(1,6,8)
 
-# see https://plotly.com/r/reference/#scatter-marker-colorbar
-fig <- fig1 %>% 
-       layout(xaxis = list(title = names(Design)[c1], range = c(-1,1), #limits[,c1],
-                           showline = T, mirror = T, linewidth = 1),
-              yaxis = list(title = names(Design)[c2], range = c(-1,1), #limits[,c2],
-                           showline = T, mirror = T, linewidth = 1),
-              font = list(family = "Balto",size = 20)
-              ) %>% 
-       colorbar(fig1, len=1, outlinecolor = 'black', outlinewidth = 1,
-                thickness = 25, ticklabelposition = 'outside',
-                title = list(text = 'min I.M.', side = 'top'))
+for (c1 in dims){
+  for (c2 in setdiff(dims, c1)){
+    min.Impl <- Cross.Sect(Eval.points.full, vals, c1, c2, min)
+    fig1 <- plot_ly(data = min.Impl,
+                    x = ~x, y = ~y, z = ~z,
+                    type = 'contour',
+                    contours = list(coloring = 'heatmap'),
+                    line = list(smoothing=1, width = 1.5, color = rgb(0.75, 0.75, 0.75))
+                    )
+    
+    # see https://plotly.com/r/reference/#scatter-marker-colorbar
+    fig <- fig1 %>% 
+      layout(xaxis = list(title = names(Design)[c1], range = c(-1,1), #limits[,c1],
+                          showline = T, mirror = T, linewidth = 1),
+             yaxis = list(title = names(Design)[c2], range = c(-1,1), #limits[,c2],
+                          showline = T, mirror = T, linewidth = 1),
+             font = list(family = "Balto", size = 30)
+      ) %>% 
+      colorbar(fig1, len=1, outlinecolor = 'black', outlinewidth = 1,
+               thickness = 25, ticklabelposition = 'outside',
+               title = list(text = 'min I.M.', side = 'top'))
 
-# SAVE PLOT
-file.name <- paste("../Pictures/Gas_Compatibility/Min_Impl/minImpl_MD=20_x=",
-                   as.character(c1), "_y=", as.character(c2), ".pdf", sep = "")
-orca(fig, file.name)
+    fig
+    # SAVE PLOT
+    file.name <- paste("../Pictures/Gas_Compatibility/Min_Impl/minImpl_MD=20_x=",
+                       as.character(c1), "_y=", as.character(c2), ".png", sep = "")
+    save_image(fig, file.name, scale = 3)
+  }
+}
+
+# If the save_image command doesn't work, do the following first:
+# install.packages('reticulate')
+# reticulate::install_miniconda()
+# reticulate::conda_install('r-reticulate', 'python-kaleido')
+# reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')
+# reticulate::use_miniconda('r-reticulate')
 
 
-# DENSITY PLOT
+
+
+
+# DENSITY 'OPTICAL DEPTH' PLOTS
+
 my.palette <- c("#E24C80", "#E64D8B", "#E84F96", "#EA52A1", "#EC55AB", "#ED59B4", "#EE5DBD", "#EE62C6", "#ED67CE", "#EC6CD6", "#EA72DD", "#E878E4", "#E57EEA", "#E284F0", "#DE8AF5", "#DA90F9", "#D597FE", "#D09DFF", "#CBA3FF", "#C6A9FF", "#C0AFFF", "#BAB5FF", "#B4BBFF", "#AEC0FF", "#A9C6FF", "#A3CBFF", "#9ED0FF", "#99D5FF", "#95DAFF", "#92DFFF", "#8FE3FF", "#8DE7FF", "#8CEBFF", "#8CEFFF", "#8DF3FF", "#8FF7FF", "#92FBFF", "#96FEFF", "#9AFFFF", "#9FFFFF", "#C1C1C1")
 
-c1 <- 8
-c2 <- 6
-system.time(opt.depth <- Cross.Sect(Eval.points.full, vals, c1, c2, function(x){100*sum(x<4)/length(x)}))
-fig1 <- plot_ly(
-  type = 'contour',
-  x = opt.depth[[1]],
-  y = opt.depth[[2]],
-  z = opt.depth[[3]],
-  colors = my.palette,
-  reversescale = T,
-  contours = list(coloring = 'heatmap'),
-  line = list(smoothing=1, width = 0.5, color = 'black')
-)
-
-fig <- fig1 %>% 
-  layout(xaxis = list(title = names(Design)[c1], range = c(-1,1), #limits[,c1],
-                      showline = T, mirror = T, linewidth = 1),
-         yaxis = list(title = names(Design)[c2], range = c(-1,1), #limits[,c2],
-                      showline = T, mirror = T, linewidth = 1),
-         font = list(family = "Balto",size = 20)
-  ) %>% 
-  colorbar(fig1, len=1, outlinecolor = 'black', outlinewidth = 1,
-           thickness = 25, ticklabelposition = 'outside',
-           ticksuffix = "%")
-
-# SAVE PLOT
-file.name <- paste("../Pictures/Gas_Compatibility/Opt_Depth/Depth_MD=20_x=",
-                   as.character(c1), "_y=", as.character(c2), ".pdf", sep = "")
-orca(fig, file.name)
-
-
-
-
+for (c1 in dims){
+  for (c2 in setdiff(dims, c1)){
+    opt.depth <- Cross.Sect(Eval.points.full, vals, c1, c2, function(x){100*sum(x<4)/length(x)})
+    fig1 <- plot_ly(
+      type = 'contour',
+      x = opt.depth[[1]],
+      y = opt.depth[[2]],
+      z = opt.depth[[3]],
+      colors = my.palette,
+      reversescale = T,
+      contours = list(coloring = 'heatmap'),
+      line = list(smoothing=1, width = 0.5, color = 'black')
+      )
+    fig <- fig1 %>% 
+      layout(xaxis = list(title = names(Design)[c1], range = c(-1,1), #limits[,c1],
+                          showline = T, mirror = T, linewidth = 1),
+             yaxis = list(title = names(Design)[c2], range = c(-1,1), #limits[,c2],
+                          showline = T, mirror = T, linewidth = 1),
+             font = list(family = "Balto", size = 30)
+      ) %>% 
+      colorbar(fig1, len=1, outlinecolor = 'black', outlinewidth = 1,
+               thickness = 25, ticklabelposition = 'outside',
+               ticksuffix = "%")
+    
+    # SAVE PLOT
+    file.name <- paste("../Pictures/Gas_Compatibility/Opt_Depth/Depth_MD=20_x=",
+                       as.character(c1), "_y=", as.character(c2), ".png", sep = "")
+    
+    save_image(fig, file.name, scale = 3)
+  }
+}
 
 
+############################################################################
+#
+# SENSITIVITY ANALYSIS
+#
+
+library(sensitivity)
+load('RData/Inputs/Simulated_and_Observed_Gas.RData')         # Gas data (observed and simulated)
+rm(Design.Original, Gas.Obs)
+
+sens <- matrix(nrow = dim(Design)[2], ncol = dim(Gas.Sim)[2])
+rownames(sens) <- names(Design)
+colnames(sens) <- names(Gas.Sim)
+
+for (month in 1:12){
+  temp <- src(Design, Gas.Sim[, month])
+  sens[, month] <- temp$SRC[,1]
+}
+
+# Alternative method to use ggplot
+
+library(utils)
+df <- expand.grid(x = min.Impl[[1]], y = min.Impl[[2]])
+df$z <- as.vector(t(min.Impl[[3]]))
+ggplot(df, aes(x=x, y=y, z=z)) + 
+  geom_contour_filled()
