@@ -44,11 +44,11 @@ N.months <- length(month.indices)
 Global_IM <- matrix(nrow = N, ncol = N.months)
 colnames(Global_IM) <- month.names[month.indices]
 
-Mod.Discr <- 0.2
+Mod.Discr <- 0.1
 Meas.Err <- 0.05
 for (i in month.indices){
   month <- month.names[i]
-  X <- Emul.Res[[month]][N1:N2,]
+  X <- Emul.Gas[[month]][N1:N2,]
   z <- Gas.Obs[, month]
   IM <- Compute_IM( X[,"Mean"], X[,"Var"], z, Mod.Discr, Meas.Err)
   Global_IM[, month] <- IM
@@ -69,6 +69,10 @@ Z <- as.matrix(rowSums(Y, na.rm = T))  # Nx1. Z[i] = # of months with a non-impl
 gas.compat <- (Z > N.months-0.5)
 cat("The percentage of non-implausible space is: ", 
     format(100*sum(gas.compat)/N, digits = 2, nsmall = 2), "%", sep = "")
+
+# Save Compatibility results
+save(gas.compat, file = "RData/Results_Emulation/Non-Implausible-Inputs.RData")
+
 
 # PERCENTAGE OF NON-IMPLAUSIBLE SPACE FOR A GIVEN MONTH
 for (i in c(1:5,9:12)){
@@ -96,7 +100,7 @@ plot(Eval.points.full[gas.compat,c1], Eval.points.full[gas.compat,c2], col = 're
 library("plot3D")
 c1 <- 1
 c2 <- 8
-subs <- 1:10e4
+subs <- 1:1e4
 scatter2D(Eval.points.full[subs,c1], Eval.points.full[subs,c2], colvar = (sqrt(Emul.Res[[1]][subs,2])), 
           pch=20, cex=0.2)
 
@@ -203,6 +207,43 @@ for (c1 in dims){
     save_image(fig, file.name, scale = 3)
   }
 }
+
+################################################################################
+# TRANSFORM (-1,1) INTO CORRECT RANGES
+ranges <- apply(Design.Original, 2, range)
+
+#' Rescales the columns of a matrix from the range (-1,1) into the provided ranges
+#' @param X a matrix of numbers between -1 and 1
+#' @param rng a matrix with two rows and the same number of columns as X
+#' @value A matrix with the same `dim` as X, whose column j is obtained by
+#'        linearly rescaling column j of X into the range (rng[1,j], rng[2,j])
+transform_ranges <- function(X, rng){
+  p <- ncol(X)
+  for (j in 1:p){
+    a <- (rng[2,j] - rng[1,j])/2
+    b <- (rng[2,j] + rng[1,j])/2
+    X[,j] <- a*X[,j] + b
+  }
+  return(X)
+}
+
+Y <- transform_ranges(Design, ranges)
+View(Design)
+View(Design.Original)
+View(Y)
+
+f <- function(x, a, b) {(a+b)/2 + (b-a)*x/2}
+j <- 6
+f(0., ranges[1,j], ranges[2,j])
+
+
+
+
+
+
+
+
+
 
 
 ############################################################################

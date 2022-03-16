@@ -9,12 +9,22 @@
 #
 ###############################################################################
 
+
+#
+# remove data.matrix() from all designs and check that things still work (they should)
+#
+
+
+
+
+
+
+
 # SET FOLDER AND LOAD SCRIPTS/DATA
 setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
 
 library(leaps)
-load('RData/Inputs/Design_Points.RData')               # Design Points
-load('RData/Inputs/Simulated_and_Observed_Gas.RData')  # Gas data (observed and simulated)
+load('RData/Inputs/Simulated_and_Observed_Gas.RData')  # Observed and simulated gas + design points
 source('../../Emulation.R')                            # Script to carry out Emulation
 
 # Either load pre-defined subdivision, or build new one
@@ -30,7 +40,7 @@ source('../../Emulation.R')                            # Script to carry out Emu
 load('RData/Inputs/Regressors.RData')               # Regressors
 source('Auxiliary_Scripts/Emulation_Parameters.R')  # Active Inputs and Correlation lengths for each month
 
-Interactions.train <- poly(data.matrix(Design[train,]), degree=2) # orthogonal polys computed on 700 points only
+Interactions.train <- poly(Design[train,], degree=2) # orthogonal polys computed on 700 points only
 Emul.Eval <- sapply(month.names, function(x) NULL)          # will contain emulated predictions on evaluation set
 Emul.Test <- sapply(month.names, function(x) NULL)          # will contain emulated predictions on test set
 
