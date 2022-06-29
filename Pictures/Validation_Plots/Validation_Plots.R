@@ -23,6 +23,9 @@ ylabel <- expression(plain("Standardised Errors ")*hat(epsilon)[i])#*plain(" (Va
 y.limits.eval <- c(4.0, 3.5, 3.5, 4.0, 5.0, NA, NA, NA, 3.3, 3.5, 4.2, 4.0)
 y.limits.test <- c(3.7, 3.5, 3.0, 3.0, 4.5, NA, NA, NA, 4.0, 3.5, 3.0, 3.0)
 
+y.limits.eval <- rep(5, 12)
+y.limits.test <- rep(5, 12)
+
 for (month in month.vector){
   
   th <- paste(month.name[month]) # title
@@ -71,31 +74,6 @@ for (month in month.vector){
   
 }
 
-################################################################################
-# LINEAR REGRESSION RESIDUAL VARIANCE
-# AND
-# 2.5 AND 97.5 PERCENTILES OF EMULATOR VARIANCES ON VALIDATION POINTS
-
-
-Res.Var <- array(0, 12)
-R.sqr <- array(0, 12)
-
-for (month in month.vector){
-  y.train <- Gas.Sim[train, month]
-  
-  regr <- Regressors[[month]]
-  fit <- lm(y.train ~ ., data = as.data.frame(Interactions.train[, regr]))
-  Res.Var[month] <- var(fit$residuals)
-  R.sqr[month] <- summary(fit)$r.squared
-}
-
-
-for (month in month.vector){
-  v <- Emul.Test[[month]][,2]
-  q1 <- quantile(v, 0.025)
-  q2 <- quantile(v, 0.975)
-  cat('Quantiles for', month.name[month], ':', q1, '-', q2, '\n')
-}
 
 
 ################################################################################
@@ -170,21 +148,23 @@ L <- length(i)
 col.em <- rgb(1, 0.4, 0.4)
 
 file.name <- paste("../Pictures/Validation_Plots/Comparison_LR/", "LR_", 
-                   month.names[month], "_82-89", ".pdf", sep = "")
+                   month.names[month], "_82-89", ".png", sep = "")
 
 # Plots
 # Store min and max y-values
 m <- min( c(X[i,1] - n.std*sqrt(X[i,2]), LRpreds[i], y.test[i]) )
 M <- max( c(X[i,1] + n.std*sqrt(X[i,2]), LRpreds[i], y.test[i]) )
 
-pdf(file.name)
-par(cex =1.4, lwd=1.5, mgp = c(2,0.5,0))
+png(file.name, width = 7.5, height = 4.5, unit="in", res=1000)
+par(cex =1.2, lwd=1.5, 
+    mai=c(0.8, 0.8, 0.1, 0.1), # for each subplot: bott, left, top, right margin
+    mgp = c(2,0.5,0))
 
 # 1) Emulator predictions shown as cat eyes plot
 error.bars(data[,i], alpha = 0.0954659663, eyes=T, col=col.em,
-           main = 'Emulator and regression predictions',
+           main = '',
            xlab = 'Simulation Index',
-           ylab = 'Implausibility Measure',
+           ylab = 'March Gas Consumption [kWh]',
            ylim = c(m,M)
            )
 # 2) Add linear regression predictions
