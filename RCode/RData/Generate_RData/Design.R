@@ -16,4 +16,7 @@ X <- read.csv("../Data/inputs-batch2.csv")
 Design.Original <- X[, -1]           # delete first column with numbers from 1 to 1000
 Design <- Rescale.Linearly(Design.Original)
 
+Design <- data.matrix(Design)
+Design.Original <- data.matrix(Design.Original)
+
 save(Design, Design.Original, file = 'RData/Inputs/Design_Points.RData')

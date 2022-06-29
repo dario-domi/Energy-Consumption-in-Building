@@ -19,14 +19,6 @@
 ## SET FOLDER AND LOAD PACKAGES/FUNCTIONS ##
 setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
 library(openxlsx)
-source('Auxiliary_Scripts/Auxiliary_Functions.R') # for Rescale.Linearly()
-
-
-# DESIGN POINTS (1000 x 8) ##
-X <- read.csv("../Data/inputs-batch2.csv")
-Design.Original <- X[, -1]           # delete first column with numbers from 1 to 1000
-Design <- Rescale.Linearly(Design.Original)
-
 
 ######################################################################
 ## OBSERVED TEMPERATURES (MASTER AND KITCHEN) AND SEQUENCE OF DATES ##
@@ -67,7 +59,9 @@ for (i in 1:1000){
 ##################
 ## SAVE RESULTS ##
 
+load('RData/Inputs/Design_Points.RData') # Design points, 1000x8
 save(Design, Design.Original, DateTimes,
      Kitch.Sim, Mast.Sim, 
      Kitch.Obs, Mast.Obs,
      file = 'RData/Inputs/Simulated_and_Observed_Temperatures.RData')
+

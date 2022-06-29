@@ -82,12 +82,63 @@ x <- Max.Kitch.Sim[times, ] - Max.Kitch.Obs[times]
 Impl.Kitch.Aug <- diag( t(x)%*%solve(V.tot, x) )/length(times)
 
 
+### SUMMER (Jun-Aug) IMPLAUSIBILITY ON SIMULATOR RUNS
+times <- 152:243 # June
+times.hours <- (times-1)*24+1
+
+V.Obs <- 0.01 * Corr.fun(times.hours, times.hours, d = 12, string = 'exp2')
+V.MD <- 0.16 * Corr.fun(times.hours, times.hours, d = 96, string = 'exp2')
+V.tot <- V.Obs+V.MD
+
+x <- Max.Mast.Sim[times, ] - Max.Mast.Obs[times] # t x 1000
+Impl.Mast.Sum <- diag( t(x)%*%solve(V.tot, x) )/length(times)
+x <- Max.Kitch.Sim[times, ] - Max.Kitch.Obs[times]
+Impl.Kitch.Sum <- diag( t(x)%*%solve(V.tot, x) )/length(times)
+
+
+
 ## STORE THE IMPLAUSIBILITIES
 
 save(Impl.Mast.Jun, Impl.Kitch.Jun,
      Impl.Mast.Jul, Impl.Kitch.Jul,
      Impl.Mast.Aug, Impl.Kitch.Aug,
+     Impl.Mast.Sum, Impl.Kitch.Sum,
      file = "RData/Inputs/Implausibilities.RData")
+
+Z <- data.frame(M.Jun=Impl.Mast.Jun, M.Jul=Impl.Mast.Jul, 
+                M.Aug=Impl.Mast.Aug, M.Sum=Impl.Mast.Sum,
+                K.Jun=Impl.Kitch.Jun, K.Jul=Impl.Kitch.Jul,
+                K.Aug=Impl.Kitch.Aug, K.Sum=Impl.Kitch.Sum)
+
+pairs(sqrt(Z), pch=20)
+
+
+#################################################################################
+# Plots of observed and simulated time-series (overlapped)
+days <- 152:243 # June-August
+hours <- (days-1)*24+1
+
+Obs <- Max.Kitch.Obs
+Sim <- Max.Kitch.Sim
+Impl <- Impl.Kitch.Sum
+
+while (T) {
+  i <- sample(1000, 1)
+  plot(DateTimes[hours], Obs[days], ty='l', col='red', 
+       xaxt='n', ylim=c(19,27), lwd=1)
+  axis.POSIXct(side=1, x=DateTimes[hours], format = "%d %b")       # format of x tick-labels
+  imp <- sqrt(Impl[i])
+  if (imp < 3)
+    lines(DateTimes[hours], Sim[days,i], ty='l', col='blue')
+  else
+    lines(DateTimes[hours], Sim[days,i], ty='l', col=rgb(0,0,1,0.6), lty=2)
+  legend('topright', legend = c(paste('Impl:', format(imp, digits = 3))) )
+  print(i)
+  Sys.sleep(1.5)
+}
+
+
+##############################################################################
 
 
 ###############################################################################

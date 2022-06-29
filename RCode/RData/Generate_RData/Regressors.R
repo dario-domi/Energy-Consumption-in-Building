@@ -8,11 +8,11 @@
 ################################################################################
 
 # SET FOLDER AND LOAD DATA
-setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
-library(leaps)                                          # Used to select best linear model
-load('RData/Inputs/Design_Points.RData')                # Design points, 1000x8
-load('RData/Inputs/SplitSet.RData')                     # Train, Evaluation and Test sets
-load('RData/Inputs/Simulated_and_Observed_Gas.RData')   # Gas consumptions
+#setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
+#library(leaps)                                          # Used to select best linear model
+#load('RData/Inputs/Design_Points.RData')                # Design points, 1000x8
+#load('RData/Inputs/SplitSet.RData')                     # Train, Evaluation and Test sets
+#load('RData/Inputs/Simulated_and_Observed_Gas.RData')   # Gas consumptions
 
 
 # SELECT REGRESSORS
@@ -30,12 +30,14 @@ for (month in c(1:5, 9:12)){
   
   ind <- which.max(L$adjr2)                 # index (between 1 and nvmax) of model with max adj-R2
   Regressors[[month]] <- L$which[ind,-1]    # logical vector with regressors corresponding to selected model
-  
+  cat(length(y.train))
 }
 
-#fit <- lm(y.train ~ ., data = as.data.frame(Interactions.train[, Regressors[[month]] ]))
+fit <- lm(y.train ~ ., data = as.data.frame(Interactions.train[, Regressors[[month]] ]))
+summary(fit)
 
-save(Regressors, file = 'RData/Inputs/Regressors.RData')
+
+#save(Regressors, file = 'RData/Inputs/Regressors.RData')
 
 
 

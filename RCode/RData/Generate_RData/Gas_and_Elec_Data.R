@@ -20,25 +20,22 @@
 ## SET FOLDER, LOAD PACKAGES/FUNCTIONS
 setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
 library(openxlsx)
-source('Auxiliary_Scripts/Auxiliary_Functions.R')
 
 month.names <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
 ## DESIGN POINTS (1000 x 8) ##
-X <- read.csv("../Data/inputs-batch2.csv")
-Design.Original <- X[, -1]           # delete first column with numbers from 1 to 1000
-Design <- Rescale.Linearly(Design.Original)
-
+load('RData/Inputs/Design_Points.RData')
 
 ## GAS OUTPUTS (1000 x 12) ##
 Raw.out <- read.csv("../Data/results-batch2.csv", skip = 3008, nrow=1001)
-Gas.Sim <- Raw.out[-1,]          # remove baseline simulation
+Gas.Sim <- Raw.out[-1,]        # remove baseline simulation
 Gas.Sim[,"File.Name"] <- NULL    # remove first column with file name of runs
 rownames(Gas.Sim) <- 1:1000      # name the simulations by numbers
 colnames(Gas.Sim) <- month.names # assign month names
-rm(Raw.out)
+Gas.Sim <- data.matrix(Gas.Sim)
+
 
 ## GAS OBSERVATIONS (1x12) ##
 Gas.Obs <- read.xlsx("../Data/Observation vs Simulated - Hailiang.xlsx", 
@@ -54,7 +51,7 @@ Elec.Sim <- Raw.out[-1,]          # remove baseline simulation
 Elec.Sim[,"File.Name"] <- NULL    # remove first column with file name of runs
 rownames(Elec.Sim) <- 1:1000      # name the simulations by numbers
 colnames(Elec.Sim) <- month.names # assign month names
-rm(Raw.out)
+Elec.Sim <- data.matrix(Elec.Sim)
 
 ## ELEC OBSERVATIONS (1x12) ##
 Elec.Obs <- read.xlsx("../Data/Observation vs Simulated - Hailiang.xlsx", 

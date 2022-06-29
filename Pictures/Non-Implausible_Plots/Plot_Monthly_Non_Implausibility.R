@@ -68,6 +68,17 @@ for (i in 1:L){
   Monthly_NonImpl[,i] <- (Z > L-1.1)
 }
 
+# Plot percentage of space ruled out by each month, once all others are considered
+for (i in 1:L){
+  x <- length(gas.compat)/sum(Monthly_NonImpl[,i])
+  cat("Percentage of space ruled out by", colnames(Global_IM)[i], "constraint:", 100*(1-x), "%.\n")
+}
+
+
+
+
+
+
 
 ################################################################################
 
@@ -133,7 +144,7 @@ panel.hist <- function(x, ttl){
   col2 <- t_col("tan3", 0.9)
   
   # Get the breaks, add -4 and/or 4 if needed, set plot frame
-  h <- hist(x, breaks = 30, plot = FALSE)
+  h <- hist(x, breaks = 15, plot = FALSE)
   breaks <- h$breaks
   res <- add.n(breaks, 4)
   plot(range(breaks), c(0,1.4), type = 'n', yaxt = 'n', xaxt = 'n', yaxs = "i", ann = F)
@@ -272,7 +283,7 @@ lab.x.nonimpl <- list(100*c(NA,30,NA,32,NA), 100*c(NA,19,NA,20,NA,21,NA), seq(15
 
 # Set picture dimensions
 file.name <- '../Pictures/Non-Implausible_Plots/Gas/Gas_outputs.png'
-png(file.name, width = 18, height = 12, unit="in", res=288)
+png(file.name, width = 18, height = 12, unit="in", res=576)
 
 # Adjust plotting parameters
 par(mfrow=c(L,L), 

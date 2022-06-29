@@ -37,7 +37,7 @@ load('Results/Implaus_SummerMax_OptPars.RData')
 #######################################################################
 # LARGE SEQUENCE OF INPUTS AT WHICH EMULATION WILL BE CARRIED OUT
 
-load('Results/Eval_Inputs.RData') # loads Eval.points.full
+load('RData/Results_Emulation/Eval_Inputs.RData') # loads Eval.points.full
 Eval.points <- Eval.points.full[1:1.e5, ]
 rm(Eval.points.full)  # clean workspace
 invisible(gc())       # release memory
@@ -47,7 +47,6 @@ invisible(gc())       # release memory
 ## EMULATE IMPLAUSIBILITIES AT THE ABOVE INPUTS
 
 # The code below is repeated for each month and room
-
 
 
 ######################

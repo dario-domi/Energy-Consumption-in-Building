@@ -17,7 +17,7 @@ Eval.points.full <- 2*sobol(N, dim = 8, scrambling = 1, seed = 2341) -1
 colnames(Eval.points.full) <- names(Design)
 
 # Save sequence for future use
-save(Eval.points.full, file = 'RData/Results/Eval_Inputs.RData')
+save(Eval.points.full, file = 'RData/Results_Emulation/Eval_Inputs.RData')
 
 
 
