@@ -1,9 +1,9 @@
-setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/')
+setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode/')
 
-library(openxlsx)
-library(leaps)
-source('Scripts/Auxiliary_Functions.R')
-source('../Emulation.R')
+#library(openxlsx)
+#library(leaps)
+#source('Scripts/Auxiliary_Functions.R')
+source('../../Emulation.R')
 
 
 #########################################
@@ -11,13 +11,14 @@ source('../Emulation.R')
 #########################################
 
 # Creates variables with inputs and outputs of gas simulator at design points, + observations
-source('Scripts/Load_data.R') 
-Design <- Rescale.Linearly(Design)
+load('RData/Inputs/Design_Points.RData') 
 
 # Load N=1.e6 Test inputs and associated emulated gas predictions
-load('RData/Test_Inputs.RData')
-load('RData/Results_First_Million.RData') # loads
-N <- dim(res1[[1]])[1]
+load('RData/Inputs/Simulated_and_Observed_Gas.RData') # to have Gas.Obs
+load('RData/Results_Emulation/Eval_Inputs.RData') # loads Eval.points.full
+load('RData/Results_Emulation/Gas_Emulation_Results.RData') # loads Emul.Gas
+N <- dim(Emul.Gas[[1]])[1]
+month.names <- names(Emul.Gas)
 
 # Build matrix of Implausibility Measures for all observations (rows) and all months of interest (cols)
 month.indices <- c(1:5, 9:12)
@@ -28,8 +29,8 @@ Mod.Discr <- 0.1
 Meas.Err <- 0.05
 for (i in month.indices){
   month <- month.names[i]
-  X <- res1[[month]]
-  z <- Obs_gas[, month]
+  X <- Emul.Gas[[month]]
+  z <- Gas.Obs[, month]
   IM <- Compute_IM( X[,"Mean"], X[,"Var"], z, Mod.Discr, Meas.Err)
   Global_IM[, month] <- IM
   rm(X, IM)
@@ -39,10 +40,13 @@ for (i in month.indices){
 # IDENTIFY NON-IMPLAUSIBLE INPUTS
 Thresh <- 4
 Y <- abs(Global_IM)<Thresh
-Z <- as.matrix(rowSums(Y, na.rm = T))
+Z <- as.matrix(rowSums(Y))
 compat.gas <- (Z> dim(Global_IM)[2]-0.1)
 
 cat('Non-implausible space: ', 100*sum(compat.gas)/N, '%', sep = '')
+
+# Load non-implausible inputs
+load('RData/Results_Emulation/Non-Implausible-Inputs.RData')
 
 
 #######################################################
@@ -57,10 +61,11 @@ View(cor(Outputs_gas[,1], Outputs_gas[,]))
 
 # Fraction of further reduced space by introducing any month
 retained.frac <- t(sapply(month.names[month.indices], function(i){0}))
+
 for (m in month.names[month.indices]){
   Y1 <- Y[, !colnames(Y) %in% m]
-  Z <- as.matrix(rowSums(Y1, na.rm = T))
-  retained.frac[,m] <- 100 * sum(compat.gas)/sum(Z>7.9)
+  Z <- as.matrix(rowSums(Y1))
+  retained.frac[,m] <- 100 * sum(gas.compat)/sum(Z > dim(Y1)[2] - 0.1)
 }
 
 View(retained.frac)
@@ -70,16 +75,48 @@ View(retained.frac)
 # on all other months
 for (m in month.indices){
   Y1 <- Y[, !colnames(Y) %in% month.names[m]]
-  Z <- as.matrix(rowSums(Y1, na.rm = T))
-  ind.nomonth <- (Z>7.9)
+  Z <- as.matrix(rowSums(Y1))
+  ind.nomonth <- (Z > dim(Y1)[2] -0.1)
   hist(Global_IM[ind.nomonth, month.names[m]], main = month.names[m])
-  Sys.sleep(7)
+  Sys.sleep(3)
 }
 sum(ind.nomonth)
 
 # View predicted emulator values on selected inputs
-View(res1[[1]][ind.nomonth,])
+View(Emul.Gas[[1]][ind.nomonth,])
 hist(res1[[1]][ind.nomonth,"Mean"])
+
+
+# Scatter plot of paired outputs, with observation to match
+m1 <- 1
+m2 <- 2
+ind <- sample(N, 30000)
+X <- cbind(Emul.Gas[[m1]][ind, 1], Emul.Gas[[m2]][ind,1])
+plot(X[,1], X[,2], pch=20, cex=0.1, asp=1)
+points(Gas.Obs[m1], Gas.Obs[m2], pch=4, col = 'red', cex=1.3)
+
+
+# The function take a numerical vector and a factor, and returns the range
+# obtained by expanding the original range of x of a factor fac around its center
+expand_range <- function(x, fac){
+  rg <- range(x)
+  a <- rg[1]
+  b <- rg[2]
+  d <- (b-a)/2
+  A <- a - (fac-1)*d
+  B <- b + (fac-1)*d
+  return(c(A,B))
+}
+
+
+# Scatter plot of paired outputs only for non-implausible points, plus observation
+x <- Emul.Gas[[m1]][gas.compat, 1]
+y <- Emul.Gas[[m2]][gas.compat, 1]
+xl <- expand_range( c(x,Gas.Obs[m1]), 1.2)
+yl <- expand_range( c(y,Gas.Obs[m2]), 1.2)
+plot(x, y, pch=20, cex=0.1, asp=1, xlim = xl, ylim = yl)
+points(Gas.Obs[m1], Gas.Obs[m2], pch=4, col = 'red', cex=1.3)
+
 
 
 ################################################################################
