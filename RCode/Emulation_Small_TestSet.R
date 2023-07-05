@@ -1,17 +1,18 @@
 ################################################################################
-# This script works as Emulation_TestSet.R (ie, evaluates gas emulators at a 
-# given set of inputs), but is meant to be used for relatively small number of 
-# inputs, say up to a few (tens of) thousands.
+# This script works as Emulation_Gas.R (ie, evaluates gas emulators at a 
+# given set of inputs), but is meant to be used for a relatively small number 
+# of inputs, say up to a few (tens of) thousands.
 #
 # Before running this script, the following variables must be globally defined:
 # - Test.Set:   a Nx8 matrix/data.frame, with coordinates at which to evaluate 
 #               the emulators.
-# - train:      a vector subset of 1:1000, with indices used for emul training.
+# - train:      a vector subset of 1:1000, whose indices identify the training
+#               for the emulators
 # - Regressors: a 12-long list. Each element is a logical vector (of length 44)
 #               with regressors to be used in regression.
-#               Can be loaded via load("RData/Inputs/Regressors.RData").
+#               Can be loaded via load("RData/Results_Emulator/Regressors.RData").
 #
-# The created variable is called Emul (a list of 12 matrices)
+# The created variable is called Emul (a list of 12 matrices, each Nx2)
 ################################################################################
 
 #########################################
@@ -20,9 +21,9 @@
 
 source('../../Emulation.R')                            # Function to perform emulation
 
-load('RData/Inputs/Design_Points.RData')               # Design Points
-load('RData/Inputs/Simulated_and_Observed_Gas.RData')  # Gas data (observed and simulated)
-source('Auxiliary_Scripts/Emulation_Parameters.R')     # Active Inputs and Correlation lengths for each month
+load('RData/Results_Simulator/Design_Points.RData')               # Design Points
+load('RData/Results_Simulator/Simulated_and_Observed_Gas.RData')  # Gas data (observed and simulated)
+load('RData/Results_Emulator/Emulator_Parameters.RData')     # Active Inputs and Correlation lengths for each month
 
 
 #################################################
@@ -49,17 +50,17 @@ for (month in c(1:5, 9:12) ){
   beta <- fit$coefficients
   
   # Active inputs and Correlation Lengths
-  Active.Inputs <- Act_inputs[[month]]              # Index of Active Inputs
+  Active.Inputs <- Act_params[[month]]              # Index of Active Inputs
   N_Act <- length(Active.Inputs)                         
   
   # Compute Active inputs and Regressors for Train and Test Sets
   ActInp.Train <- Design[train, Active.Inputs, drop=F]          # Design points used to train the emulator
   ActInp.Test  <- Test.Set[,    Active.Inputs, drop=F]          # Points at which to evaluate the emulator
-  Regr.Train   <- cbind(1, Interactions.train[, regr, drop=F])  # Regressors for training sett
-  Regr.Test    <- cbind(1,      All.Regr.Test[, regr, drop=F])
+  Regr.Train   <- cbind(1, Interactions.train[, regr, drop=F])  # Regressors for training set
+  Regr.Test    <- cbind(1,      All.Regr.Test[, regr, drop=F])  # Regressors for test set
   
   # Prior correlation lengths and variances (explained and residual) used in the emulator
-  d <- 0.5 * Corr_lengths[month] * replicate(N_Act, 1)      # Correlation lengths
+  d <- Corr_lengths[month] * replicate(N_Act, 1)      # Correlation lengths
   sigma2.tot <- var(fit$residuals)                    # Prior cumulative variance of stochastic process
   nugget <- 0.05                                      # Fraction of residual variability
   nu2 <- nugget*sigma2.tot                            # Variance of nugget term (Gaussian noise)
@@ -77,3 +78,13 @@ for (month in c(1:5, 9:12) ){
 
 
 
+5+ (4*3.33333333) + 1 + 7.5 + 5 + 2.5 + 2.5 + 1.666666 + (4.166666^2/0.8333333 )
+
+X <- 10*matrix(c(1,0,0,0,0,1,0,2,0), 3, 3)
+Y <- 10*matrix(c(1,2,1,1,2,1,2,4,2)/4, 3, 3)
+sum(((X-Y)^2)/Y)
+
+X <- matrix(c(0,15,0,10,0,0,0,0,5), 3, 3)
+Y <- matrix(c(5,7.5,2.5, 10/3, 5, 5/3, 5/3, 2.5, 5/6), 3, 3)
+Y
+(((X-Y)^2)/Y)

@@ -61,15 +61,15 @@ myplot <- function(sim, obs, fac, l_wdt){
 load('../RCode/RData/Inputs/Simulated_and_Observed_Gas.RData')
 
 ## Number of bins for each plot (by month)
-#              J  F  M  A  M  J  J  A  S  O  N  D
+#           J  F  M  A  M  J  J  A  S  O  N  D
 nbin <-  c(15,16,15,15,14, 8, 9,15,15,15,15,15)
 
 
 #################################################
 # GRID PLOT WITH GAS HISTOGRAMS FOR ALL MONTHS
 
-Nr <- 3  # number of rows of grid plot
-Nc <- 4  # number of columns of grid plot
+Nr <- 2  # number of rows of grid plot
+Nc <- 6  # number of columns of grid plot
 
 file.name <- paste('Simulation_histograms/Batch_2_Only/Gas_Runs/All_months_gas_',
                    Nr, 'x', Nc, '.png', sep="")
@@ -147,8 +147,8 @@ summer <- c(6,7,8)  # June, July, August
 #################################################
 # GRID PLOT WITH ELEC HISTOGRAMS FOR ALL MONTHS
 
-Nr <- 3  # number of rows of grid plot
-Nc <- 4  # number of columns of grid plot
+Nr <- 2  # number of rows of grid plot
+Nc <- 6  # number of columns of grid plot
 
 file.name <- paste('Simulation_histograms/Batch_2_Only/Elec_Runs/All_months_elec_',
                    Nr, 'x', Nc, '.png', sep="")
