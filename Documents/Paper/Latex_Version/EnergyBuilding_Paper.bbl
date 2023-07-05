@@ -1,0 +1,274 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{imam2017}
+S.~Imam, D.~A. Coley, I.~Walker, {The building performance gap: Are modellers
+  literate?}, Building Services Engineering Research and Technology 38~(3)
+  (2017) 351--375.
+
+\bibitem{royapoor2018}
+M.~Royapoor, A.~Antony, T.~Roskilly, A review of building climate and plant
+  controls, and a survey of industry perspectives, Energy and Buildings 158
+  (2018) 453--465.
+
+\bibitem{ashrae2002}
+ASHRAE, {Guideline 14-2002: Measurement of Energy and Demand Savings}, ASHRAE,
+  Atlanta (2002).
+
+\bibitem{royapoor2015}
+M.~Royapoor, T.~Roskilly, Building model calibration using energy and
+  environmental data, Energy and buildings 94 (2015) 109--120.
+
+\bibitem{hou2021}
+D.~Hou, I.~Hassan, L.~Wang, {Review on building energy model calibration by
+  Bayesian inference}, Renewable and Sustainable Energy Reviews 143 (2021)
+  110930.
+\newblock \href {https://doi.org/10.1016/j.rser.2021.110930}
+  {\path{doi:10.1016/j.rser.2021.110930}}.
+
+\bibitem{goldstein2017}
+M.~Goldstein, N.~Huntley, {Bayes Linear Emulation, History Matching, and
+  Forecasting for Complex Computer Simulators}, in: R.~Ghanem, D.~Higdon,
+  H.~Owhadi (Eds.), {Handbook of Uncertainty Quantification}, Springer
+  International Publishing, 2017, pp. 9--32.
+\newblock \href {https://doi.org/10.1007/978-3-319-12385-1\_14}
+  {\path{doi:10.1007/978-3-319-12385-1\_14}}.
+
+\bibitem{kennedy2001}
+M.~C. Kennedy, A.~O'Hagan, {Bayesian Calibration of Computer Models}, Journal
+  of the Royal Statistical Society: Series B 63~(3) (2001) 425--464.
+
+\bibitem{ohagan2006tutorial}
+A.~O’Hagan, {Bayesian analysis of computer code outputs: A tutorial},
+  Reliability Engineering \& System Safety 91~(10-11) (2006) 1290--1300.
+
+\bibitem{craig2001}
+P.~S. Craig, M.~Goldstein, J.~C. Rougier, A.~H. Seheult, {Bayesian Forecasting
+  for Complex Systems Using Computer Simulators}, Journal of the American
+  Statistical Association 96~(454) (2001) 717--729.
+
+\bibitem{edwards2021}
+T.~L. Edwards, S.~Nowicki, B.~Marzeion, R.~Hock, H.~Goelzer, H.~Seroussi,
+  et~al., {Projected land ice contributions to twenty-first-century sea level
+  rise}, Nature 593~(7857) (2021) 74--82.
+
+\bibitem{wilson2018}
+A.~L. Wilson, C.~J. Dent, M.~Goldstein, {Quantifying uncertainty in wholesale
+  electricity price projections using Bayesian emulation of a generation
+  investment model}, Sustainable Energy, Grids and Networks 13 (2018) 42--55.
+
+\bibitem{andrianakis2015}
+I.~Andrianakis, I.~R. Vernon, N.~McCreesh, T.~J. McKinley, J.~E. Oakley, R.~N.
+  Nsubuga, M.~Goldstein, R.~G. White, {Bayesian history matching of complex
+  infectious disease models using emulation: a tutorial and a case study on HIV
+  in Uganda}, PLoS computational biology 11~(1) (2015) e1003968.
+
+\bibitem{craig1997}
+P.~S. Craig, M.~Goldstein, A.~H. Seheult, J.~A. Smith, {Pressure matching for
+  hydrocarbon reservoirs: a case study in the use of Bayes linear strategies
+  for large computer experiments}, in: Case Studies in Bayesian Statistics,
+  Vol. 121 of Lecture notes in statistics, Springer, 1997, pp. 37--93.
+\newblock \href {https://doi.org/10.1007/978-1-4612-2290-3\_2}
+  {\path{doi:10.1007/978-1-4612-2290-3\_2}}.
+
+\bibitem{vernon2010galaxy}
+I.~Vernon, M.~Goldstein, R.~G. Bower, {Galaxy formation: a Bayesian uncertainty
+  analysis}, Bayesian analysis 5~(4) (2010) 619--669.
+\newblock \href {https://doi.org/10.1214/10-BA524}
+  {\path{doi:10.1214/10-BA524}}.
+
+\bibitem{domingo2020}
+D.~Domingo, I.~Malmierca-Vallet, L.~Sime, J.~Voss, E.~Capron, {Using ice cores
+  and Gaussian process emulation to recover changes in the Greenland ice sheet
+  during the last interglacial}, Journal of Geophysical Research: Earth Surface
+  125~(5) (2020).
+\newblock \href {https://doi.org/10.1029/2019JF005237}
+  {\path{doi:10.1029/2019JF005237}}.
+
+\bibitem{vernon2018gene}
+I.~Vernon, J.~Liu, M.~Goldstein, J.~Rowe, J.~Topping, K.~Lindsey, {Bayesian
+  uncertainty analysis for complex systems biology models: emulation, global
+  parameter searches and evaluation of gene functions}, BMC systems biology
+  12~(1) (2018) 1--29.
+
+\bibitem{daly2014}
+D.~Daly, P.~Cooper, Z.~Ma, {Understanding the risks and uncertainties
+  introduced by common assumptions in energy simulations for Australian
+  commercial buildings}, Energy and Buildings 75 (2014) 382--393.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2014.02.028}
+  {\path{doi:10.1016/j.enbuild.2014.02.028}}.
+
+\bibitem{rasooli2016}
+A.~Rasooli, L.~Itard, C.~I. Ferreira, {A response factor-based method for the
+  rapid in-situ determination of wall’s thermal resistance in existing
+  buildings}, Energy and Buildings 119 (2016) 51--61.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2016.03.009}
+  {\path{doi:10.1016/j.enbuild.2016.03.009}}.
+
+\bibitem{deconinck2016}
+A.-H. Deconinck, S.~Roels, {Comparison of characterisation methods determining
+  the thermal resistance of building components from onsite measurements},
+  Energy and Buildings 130 (2016) 309--320.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2016.08.061}
+  {\path{doi:10.1016/j.enbuild.2016.08.061}}.
+
+\bibitem{meng2015}
+X.~Meng, B.~Yan, Y.~Gao, J.~Wang, W.~Zhang, E.~Long, {Factors affecting the in
+  situ measurement accuracy of the wall heat transfer coefficient using the
+  heat flow meter method}, Energy and Buildings 86 (2015) 754--765.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2014.11.005}
+  {\path{doi:10.1016/j.enbuild.2014.11.005}}.
+
+\bibitem{ficco2015}
+G.~Ficco, F.~Iannetta, E.~Ianniello, F.~R.~d. Alfano, M.~Dell’Isola, {U-value
+  in situ measurement for energy diagnosis of existing buildings}, Energy and
+  Buildings 104 (2015) 108--121.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2015.06.071}
+  {\path{doi:10.1016/j.enbuild.2015.06.071}}.
+
+\bibitem{gaspar2016}
+K.~Gaspar, M.~Casals, M.~Gangolells, {A comparison of standardized calculation
+  methods for in situ measurements of fa{\c{c}}ades U-value}, Energy and
+  Buildings 130 (2016) 592--599.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2016.08.072}
+  {\path{doi:10.1016/j.enbuild.2016.08.072}}.
+
+\bibitem{desogus2011}
+G.~Desogus, S.~Mura, R.~Ricciu, {Comparing different approaches to in situ
+  measurement of building components thermal resistance}, Energy and Buildings
+  43~(10) (2011) 2613--2620.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2011.05.025}
+  {\path{doi:10.1016/j.enbuild.2011.05.025}}.
+
+\bibitem{hoffmann2017}
+C.~Hoffmann, A.~Geissler, {The prebound-effect in detail: real indoor
+  temperatures in basements and measured versus calculated U-values}, Energy
+  Procedia 122 (2017) 32--37.
+\newblock \href {https://doi.org/10.1016/j.egypro.2017.07.301}
+  {\path{doi:10.1016/j.egypro.2017.07.301}}.
+
+\bibitem{marshall2017}
+A.~Marshall, R.~Fitton, W.~Swan, D.~Farmer, D.~Johnston, M.~Benjaber, Y.~Ji,
+  {Domestic building fabric performance: Closing the gap between the in situ
+  measured and modelled performance}, Energy and Buildings 150 (2017) 307--317.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2017.06.028}
+  {\path{doi:10.1016/j.enbuild.2017.06.028}}.
+
+\bibitem{baker2011}
+P.~Baker, {U-values and traditional buildings}, Historic Scotland Conservation
+  Group: Glasgow, UK (2011).
+
+\bibitem{yassaghi2019}
+H.~Yassaghi, N.~Mostafavi, S.~Hoque, {Evaluation of current and future hourly
+  weather data intended for building designs: A Philadelphia case study},
+  Energy and Buildings 199 (2019) 491--511.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2019.07.016}
+  {\path{doi:10.1016/j.enbuild.2019.07.016}}.
+
+\bibitem{hong2016}
+T.~Hong, S.~C. Taylor-Lange, S.~D’Oca, D.~Yan, S.~P. Corgnati, {Advances in
+  research and applications of energy-related occupant behavior in buildings},
+  Energy and buildings 116 (2016) 694--702.
+\newblock \href {https://doi.org/10.1016/j.enbuild.2015.11.052}
+  {\path{doi:10.1016/j.enbuild.2015.11.052}}.
+
+\bibitem{tian2018}
+W.~Tian, Y.~Heo, P.~De~Wilde, Z.~Li, D.~Yan, C.~S. Park, X.~Feng, G.~Augenbroe,
+  {A review of uncertainty analysis in building energy assessment}, Renewable
+  and Sustainable Energy Reviews 93 (2018) 285--301.
+\newblock \href {https://doi.org/10.1016/j.rser.2018.05.029}
+  {\path{doi:10.1016/j.rser.2018.05.029}}.
+
+\bibitem{coveney2018}
+S.~Coveney, R.~H. Clayton, {Fitting two human atrial cell models to
+  experimental data using Bayesian history matching}, Progress in biophysics
+  and molecular biology 139 (2018) 43--58.
+\newblock \href {https://doi.org/10.1016/j.pbiomolbio.2018.08.001}
+  {\path{doi:10.1016/j.pbiomolbio.2018.08.001}}.
+
+\bibitem{BLS2007}
+M.~Goldstein, D.~Wooff, {Bayes Linear Statistics: Theory and Methods}, Wiley
+  Series in Probability and Statistics, John Wiley \& Sons, 2007.
+
+\bibitem{Rasmussen}
+C.~E. Rasmussen, C.~K. Williams, Gaussian {P}rocesses for {M}achine {L}earning,
+  The MIT Press, Massachusetts Institute of Technology, 2006.
+
+\bibitem{3sigma}
+F.~Pukelsheim, The three sigma rule, The American Statistician 48~(2) (1994)
+  88--91.
+\newblock \href {https://doi.org/10.2307/2684253} {\path{doi:10.2307/2684253}}.
+
+\bibitem{hmer}
+A.~Iskauskas, \href{https://CRAN.R-project.org/package=hmer}{hmer: History
+  Matching and Emulation Package} (2022).
+\newline\urlprefix\url{https://CRAN.R-project.org/package=hmer}
+
+\bibitem{kragh2017}
+J.~Kragh, J.~Rose, H.~N. Knudsen, O.~M. Jensen, {Possible explanations for the
+  gap between calculated and measured energy consumption of new houses}, Energy
+  Procedia 132 (2017) 69--74.
+\newblock \href {https://doi.org/10.1016/j.egypro.2017.09.638}
+  {\path{doi:10.1016/j.egypro.2017.09.638}}.
+
+\bibitem{loeppky2009}
+J.~L. Loeppky, J.~Sacks, W.~J. Welch, {Choosing the Sample Size of a Computer
+  Experiment: A Practical Guide}, Technometrics 51~(4) (2009) 366--376.
+\newblock \href {https://doi.org/10.1198/TECH.2009.08040}
+  {\path{doi:10.1198/TECH.2009.08040}}.
+
+\bibitem{lord2017}
+N.~S. Lord, M.~Crucifix, D.~J. Lunt, M.~C. Thorne, N.~Bounceur, H.~Dowsett,
+  C.~L. O'Brien, A.~Ridgwell, {Emulation of long-term changes in global
+  climate: application to the late Pliocene and future}, Climate of the Past
+  13~(11) (2017) 1539--1571.
+\newblock \href {https://doi.org/10.5194/cp-13-1539-2017}
+  {\path{doi:10.5194/cp-13-1539-2017}}.
+
+\bibitem{pope2021}
+C.~A. Pope, J.~P. Gosling, S.~Barber, J.~S. Johnson, T.~Yamaguchi, G.~Feingold,
+  P.~G. Blackwell, {Gaussian Process Modeling of Heterogeneity and
+  Discontinuities Using Voronoi Tessellations}, Technometrics 63~(1) (2021)
+  53--63.
+\newblock \href {https://doi.org/10.1080/00401706.2019.1692696}
+  {\path{doi:10.1080/00401706.2019.1692696}}.
+
+\bibitem{mckay2000}
+M.~D. Mckay, R.~J. Beckman, W.~J. Conover, {A Comparison of Three Methods for
+  Selecting Values of Input Variables in the Analysis of Output From a Computer
+  Code}, Technometrics 42~(1) (2000) 55--61.
+\newblock \href {https://doi.org/10.1080/00401706.2000.10485979}
+  {\path{doi:10.1080/00401706.2000.10485979}}.
+
+\bibitem{cumming2009}
+J.~A. Cumming, M.~Goldstein, {Small Sample Bayesian Designs for Complex
+  High-Dimensional Models Based on Information Gained Using Fast
+  Approximations}, Technometrics 51~(4) (2009) 377--388.
+\newblock \href {https://doi.org/10.1198/TECH.2009.08015}
+  {\path{doi:10.1198/TECH.2009.08015}}.
+
+\bibitem{harvey2018}
+N.~J. Harvey, N.~Huntley, H.~F. Dacre, M.~Goldstein, D.~Thomson, H.~Webster,
+  {Multi-level emulation of a volcanic ash transport and dispersion model to
+  quantify sensitivity to uncertain parameters}, Natural hazards and earth
+  system sciences 18~(1) (2018) 41--63.
+\newblock \href {https://doi.org/10.5194/nhess-18-41-2018}
+  {\path{doi:10.5194/nhess-18-41-2018}}.
+
+\bibitem{conti2009}
+S.~Conti, J.~P. Gosling, J.~E. Oakley, A.~O'Hagan, Gaussian process emulation
+  of dynamic computer codes, Biometrika 96~(3) (2009) 663--676.
+\newblock \href {https://doi.org/10.1093/biomet/asp028}
+  {\path{doi:10.1093/biomet/asp028}}.
+
+\bibitem{cumming2010}
+J.~A. Cumming, M.~Goldstein, {Bayes Linear Uncertainty Analysis for Oil
+  Reservoirs Based on Multiscale Computer Experiments}, in: A.~O’Hagan,
+  M.~West (Eds.), The Oxford Handbook of Applied Bayesian Analysis, Oxford
+  University Press Oxford, 2010, pp. 241--270.
+
+\end{thebibliography}
