@@ -72,7 +72,7 @@ M <- max( c(X[ind,1] + n.std*sqrt(X[ind,2]), LRpreds[ind], y.test[ind]) )
 
 # Path to save plot
 file.name <- paste("../Pictures/Validation_Plots/Comparison_LR/", "LR_", 
-                   month.names[month], "_82-89", ".png", sep = "")
+                   month, "_82-89", ".png", sep = "")
 
 # Colour of cats eyes
 col.em <- rgb(1, 0.4, 0.4)
