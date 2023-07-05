@@ -36,7 +36,7 @@ load('RData/Results_Emulation/Gas_Emulation_Results.RData')   # Emulated gas con
 load('RData/Inputs/Simulated_and_Observed_Gas.RData')         # Gas data (observed and simulated)
 rm(Design.Original, Gas.Sim)
 
-# EMULATED aAND OBSERVED TEMPERATURE DIFFERENCE IN KITCHEN AND MASTER
+# EMULATED AND OBSERVED TEMPERATURE DIFFERENCE IN KITCHEN AND MASTER
 load("RData/Results_Emulation/Emul_SummTempDiff.RData")
 
 

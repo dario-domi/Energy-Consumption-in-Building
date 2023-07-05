@@ -2,15 +2,15 @@
 
 # Saves the data regarding simulated and observed monthly consumption, both gas
 # and electricity. Data saved in:
-# RData/Inputs/Simulated_and_Observed_Gas.RData. 
-# RData/Inputs/Simulated_and_Observed_Elec.RData.
+# RData/Results_Simulator/Simulated_and_Observed_Gas.RData. 
+# RData/Results_Simulator/Simulated_and_Observed_Elec.RData.
 #
 # The file Simulated_and_Observed_Gas.RData contains:
 #
-# Design.Original:   1000x8, set of 1000 8dim inputs at which simulations are available
-# Design:   1000x8, as Design, but columns rescaled in [-1,1]
-# Gas.Sim:  1000x12, simulated consumption at each of the 1000 inputs, for the 12 months
-# Gas.Obs:  1x12, observed monthly gas consumption
+# Design.Original: matrix, 1000x8, with the  1000 8dim input configurations for the design runs
+# Design:          1000x8, as Design, but columns rescaled in [-1,1]
+# Gas.Sim:         1000x12, simulated consumption at each of the 1000 inputs, for the 12 months
+# Gas.Obs:         1x12, observed monthly gas consumption
 #
 # Similarly for Simulated_and_Observed_Elec.RData
 
@@ -26,11 +26,11 @@ month.names <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
 
 
 ## DESIGN POINTS (1000 x 8) ##
-load('RData/Inputs/Design_Points.RData')
+load('RData/Results_Simulator/Design_Points.RData')
 
 ## GAS OUTPUTS (1000 x 12) ##
-Raw.out <- read.csv("../Data/results-batch2.csv", skip = 3008, nrow=1001)
-Gas.Sim <- Raw.out[-1,]        # remove baseline simulation
+Raw.out <- read.csv("../Data/results-batch2.csv", skip = 3008, nrow=1001) # Only read the gas rows
+Gas.Sim <- Raw.out[-1,]          # remove baseline simulation
 Gas.Sim[,"File.Name"] <- NULL    # remove first column with file name of runs
 rownames(Gas.Sim) <- 1:1000      # name the simulations by numbers
 colnames(Gas.Sim) <- month.names # assign month names
@@ -63,11 +63,11 @@ colnames(Elec.Obs) <- month.names # name columns by month
 
 ## SAVE RESULTS GAS ##
 save(Design, Design.Original, Gas.Obs, Gas.Sim, month.names,
-     file = 'RData/Inputs/Simulated_and_Observed_Gas.RData')
+     file = 'RData/Results_Simulator/Simulated_and_Observed_Gas.RData')
 
 ## SAVE RESULTS ELEC ##
 save(Design, Design.Original, Elec.Obs, Elec.Sim, month.names,
-     file = 'RData/Inputs/Simulated_and_Observed_Elec.RData')
+     file = 'RData/Results_Simulator/Simulated_and_Observed_Elec.RData')
 
 
 

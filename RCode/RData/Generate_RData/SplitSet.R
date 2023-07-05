@@ -18,13 +18,8 @@ test  <- (1:1000)[-c(train, eval)]                     # Test set,       150 poi
 train <- sort(train)
 eval <- sort(eval)
 
-
-
-
-
-
-
-
+# Save
+save(train, test, eval, file = "RData/Results_Emulator/SplitSet.RData")
 
 
 
