@@ -17,23 +17,23 @@
 ## PRELIMINARY ACTIONS: LOAD FUNCTIONS AND DATA
 ##################################################
 
+#library(cgwtools)                # to use resave(), to append data to an existing .RData file
+
 # SET FOLDER AND LOAD LIBRARIES
 setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
-library(cgwtools)                # to use resave(), to append data to an existing .RData file
 
 # LOAD CUSTOM FUNCTION TO COMPUTE IMPLAUSIBILITY MEASURE
 source("../../Emulation.R")
-rm(BL.Emul, Corr.fun)
+rm(BL.Emul, Corr.matrix)
 
 # INPUTS
-load('RData/Results_Emulation/Eval_Inputs.RData') # loads Eval.points.full
+load('RData/Results_Emulator/Evaluation_Set.RData') # loads Eval.points.full, 610Mb
 Eval.points <- Eval.points.full
-rm(Eval.points.full)  # clean workspace
-invisible(gc())       # release memory
+rm(Eval.points.full); invisible(gc())   # remove variable and release memory
 
 # EMULATED GAS CONSUMPTIONS, AND OBSERVED CONSUMPTION
-load('RData/Results_Emulation/Gas_Emulation_Results.RData')   # Emulated gas consumptions (Emul.Res)
-load('RData/Inputs/Simulated_and_Observed_Gas.RData')         # Gas data (observed and simulated)
+load('RData/Results_Simulator/Simulated_and_Observed_Gas.RData')    # Gas data (observed and simulated)
+load('RData/Results_Emulator/Gas_Emulation_Results.RData')          # Emulated gas consumptions (Emul.Gas, 1.34 Gb)
 rm(Design.Original, Gas.Sim)
 
 # EMULATED AND OBSERVED TEMPERATURE DIFFERENCE IN KITCHEN AND MASTER
@@ -44,34 +44,36 @@ load("RData/Results_Emulation/Emul_SummTempDiff.RData")
 # COMPUTE IMPLAUSIBILITY MEASURES FOR GAS AND SAVE THEM
 ##########################################################################
 
-# USEFUL VARIABLES
-month.indices <- c(1:5, 9:12)
-N.months <- length(month.indices)
-N <- nrow(Emul.Gas[[1]])
-Global_IM <- matrix(nrow = N, ncol = N.months)     # Impl-measure matrix
-colnames(Global_IM) <- month.names[month.indices]
+# PREPARE MATRIX WHERE IMPLAUSIBILITY MEASURES WILL BE STORED
 
-# BUILD MATRIX WITH IMPLAUSIBILITY MEASURES: ROWS <-> INPUTS, COLS <-> MONTHS
+# IMs: Nx9 matrix, with: IMs[i,j]= Impl measures for month j, at input i
+months <- c("Jan", "Feb", "Mar", "Apr", "May", "Sep", "Oct", "Nov", "Dec")
+N.months <- length(months)
+N <- nrow(Emul.Gas[[1]])
+IMs <- matrix(nrow = N, ncol = N.months)   # Implausibility measures, 0.34Gb
+colnames(IMs) <- months
+
+# BUILD MATRIX WITH IMPLAUSIBILITY MEASURES: ROWS: INPUTS; COLS: MONTHS
 Mod.Discr <- 0.1
 Meas.Err <- 0.05
-for (i in month.indices){
-  month <- month.names[i]
+for (month in months){
   X <- Emul.Gas[[month]]
   z <- Gas.Obs[, month]
-  IM <- Compute_IM( X[,"Mean"], X[,"Var"], z, Mod.Discr, Meas.Err)
-  Global_IM[, month] <- IM
-  rm(X, IM)
+  IM_month <- Compute_IM( X[,"Mean"], X[,"Var"], z, Mod.Discr, Meas.Err)
+  IMs[, month] <- IM_month
+  rm(X, IM_month)
   invisible(gc())
 }
 
-# BUILD MATRIX Y WITH: Y[i,j]=1 if abs(Global_IM[i,j])<C; Y[i,j]=0 otherwise.
+# BUILD INDICATOR MATRIX Y: Y[i,j]=1 if abs(IMs[i,j])<C.
 C <- 4                                 # threshold for history matching
-Y <- ifelse( abs(Global_IM) < C, 1, 0) 
-Z <- rowSums(Y, na.rm = T)             # N-vector. Z[i] = # of months with a non-implausible match
+Y <- ifelse( abs(IMs) < C, 1, 0); invisible(gc())
+Z <- rowSums(Y, na.rm = T)             # N-vector. Z[i] = # of months whose IM is < C
 
 # COMPUTE AND SAVE VECTOR OF NON-IMPLAUSIBLE INPUTS
-gas.compat <- (Z > N.months-0.5)
-#resave(gas.compat, file = "RData/Results_Emulation/Non-Implausible-Inputs.RData")
+gas.compat <- (Z > N.months-0.5)       # Logical vector, N-dim. Which inputs are non-implausible
+# The function "resave" *adds* the specified variable to the RData file. Does not replace the file.
+# resave(gas.compat, file = "RData/Results_Emulator/Non-Implausible-Inputs.RData") # needs cgwtools library
 
 cat("The percentage of non-implausible space is: ", 
     format(100*mean(gas.compat), digits = 2, nsmall = 5), "%", sep = "")
