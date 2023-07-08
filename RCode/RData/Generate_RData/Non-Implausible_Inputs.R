@@ -2,13 +2,13 @@
 #
 # This script loads the results (means and variances) of emulation at a large 
 # sequence of inputs, for:
-# 1) monthly gas consumption in the flat; 
+# 1) monthly gas consumption in the building; 
 # 2) average day/night temperature difference in July, in the kitchen;
 # 3) average day/night temperature difference in July, in the master room.
 #
-# It then computes implausibility measures associated with each input
-# for each of the three quantities, and saves them in the file
-#"RData/Results_Emulation/Non-Implausible-Inputs.RData".
+# It then generates the following RData files in RData/Results_Emulator:
+# Full_Implausibilities.RData: Impl. Measures for Gas and Temperature
+# Non-Implausible_Inputs.RData: Logical vector identifying indices of non-impl inputs
 #
 ################################################################################
 
@@ -17,7 +17,7 @@
 ## PRELIMINARY ACTIONS: LOAD FUNCTIONS AND DATA
 ##################################################
 
-#library(cgwtools)                # to use resave(), to append data to an existing .RData file
+library(cgwtools)                # to use resave(), to append data to an existing .RData file
 
 # SET FOLDER AND LOAD LIBRARIES
 setwd('/Users/Durham/Desktop/PostDoc/Projects/UQ_Energy_Building/RCode')
@@ -46,12 +46,12 @@ load("RData/Results_Emulation/Emul_SummTempDiff.RData")
 
 # PREPARE MATRIX WHERE IMPLAUSIBILITY MEASURES WILL BE STORED
 
-# IMs: Nx9 matrix, with: IMs[i,j]= Impl measures for month j, at input i
+# IM.Gas: Nx9 matrix, with: IM.Gas[i,j]= Impl measures for month j, at input i
 months <- c("Jan", "Feb", "Mar", "Apr", "May", "Sep", "Oct", "Nov", "Dec")
 N.months <- length(months)
 N <- nrow(Emul.Gas[[1]])
-IMs <- matrix(nrow = N, ncol = N.months)   # Implausibility measures, 0.34Gb
-colnames(IMs) <- months
+IM.Gas <- matrix(nrow = N, ncol = N.months)   # Implausibility measures, 0.34Gb
+colnames(IM.Gas) <- months
 
 # BUILD MATRIX WITH IMPLAUSIBILITY MEASURES: ROWS: INPUTS; COLS: MONTHS
 Mod.Discr <- 0.1
@@ -60,30 +60,34 @@ for (month in months){
   X <- Emul.Gas[[month]]
   z <- Gas.Obs[, month]
   IM_month <- Compute_IM( X[,"Mean"], X[,"Var"], z, Mod.Discr, Meas.Err)
-  IMs[, month] <- IM_month
+  IM.Gas[, month] <- IM_month
   rm(X, IM_month)
   invisible(gc())
 }
 
-# BUILD INDICATOR MATRIX Y: Y[i,j]=1 if abs(IMs[i,j])<C.
+# SAVE VARIABLE IN RDATA FILE
+
+# Run the above with 0.1 and 0.2 Mod.Discr, and save the results
+# The function "resave" *adds* the specified variable to the RData file. Does not overwrite the file.
+IM.Gas10 <- IM.Gas
+resave(IM.Gas10, file = "RData/Results_Emulator/Full_Implausibilities.RData") # needs cgwtools library
+
+# If file does not exist, use save instead
+# save(IM.Gas10, file = "RData/Results_Emulator/Full_Implausibilities.RData")
+
+
+##########################################################################
+# IDENTIFY INDICES OF NON-IMPLAUSIBLE INPUTS AND SAVE THEM
+##########################################################################
+
+# BUILD INDICATOR MATRIX Y: Y[i,j]=1 if abs(IM.Gas[i,j])<C.
 C <- 4                                 # threshold for history matching
-Y <- ifelse( abs(IMs) < C, 1, 0); invisible(gc())
-Z <- rowSums(Y, na.rm = T)             # N-vector. Z[i] = # of months whose IM is < C
+Y <- ifelse( abs(IM.Gas) < C, 1, 0); invisible(gc())
+Z <- rowSums(Y, na.rm = T)             # N-vector. Z[i] = # of months where IM.Gas[i,] < C
 
 # COMPUTE AND SAVE VECTOR OF NON-IMPLAUSIBLE INPUTS
 gas.compat <- (Z > N.months-0.5)       # Logical vector, N-dim. Which inputs are non-implausible
-# The function "resave" *adds* the specified variable to the RData file. Does not replace the file.
-# resave(gas.compat, file = "RData/Results_Emulator/Non-Implausible-Inputs.RData") # needs cgwtools library
-
-cat("The percentage of non-implausible space is: ", 
-    format(100*mean(gas.compat), digits = 2, nsmall = 5), "%", sep = "")
-
-# PERCENTAGE OF NON-IMPLAUSIBLE SPACE FOR A GIVEN MONTH
-for (i in c(1:5,9:12)){
-  month <- month.names[i]
-  cat("Percentage of non-implausible space for ", month, ": ", 
-      format(100*sum( Y[,month] )/N, digits = 3, nsmall = 1), "%\n", sep = "")
-}
+resave(gas.compat, file = "RData/Results_Emulator/Non-Implausible_Inputs.RData") # needs cgwtools library
 
 
 ################################################################################
@@ -107,5 +111,5 @@ IM.mast <- Compute_IM( X[,"Mean"], X[,"Var"], z, Mod.Discr, Meas.Err)
 mast.compat <- abs(IM.mast)<3
 
 #resave('kitch.compat', 'mast.compat', 
-#       file = "RData/Results_Emulation/Non-Implausible-Inputs.RData")
+#       file = "RData/Results_Emulation/Non-Implausible_Inputs.RData")
 
