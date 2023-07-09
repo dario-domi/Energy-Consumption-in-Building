@@ -23,10 +23,10 @@ Eval.points <- Eval.points.full
 rm(Eval.points.full); invisible(gc())   # remove variable and release memory
 
 # FULL NON IMPLAUSIBILITY MATRIX (10% AND 20% MODEL DISCREPANCY)
-load("RData/Results_Emulator/Full_Implausibilities.RData")
+load("RData/Results_Emulator/Full_Implausibilities.RData")  # IM.Gas10 and IM.Gas20
 
 # NON-IMPLAUSIBLE INPUTS (gas and temperature)
-load("RData/Results_Emulator/Non-Implausible-Inputs.RData")
+load("RData/Results_Emulator/Non-Implausible_Inputs.RData")
 temp.compat <- kitch.compat & mast.compat
 
 
@@ -131,7 +131,7 @@ fig <- subplot(hide_colorbar(fig1), hide_colorbar(fig2), fig3,
                margin = 0.035, widths = c(0.322, 0.356, 0.322),
                titleX = T, titleY = T, shareX = T)
 
-save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Min_Impl_10%.png', scale = 3)
+save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Min_Impl_10MD.png', scale = 3)
 
 
 # If the save_image command doesn't work, do the following first:
@@ -223,7 +223,7 @@ fig <- subplot(hide_colorbar(fig4), hide_colorbar(fig5), fig6,
 
 #####   SAVE IMAGE    #####
 
-save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Opt_Depth_10%.png', scale = 3)
+save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Opt_Depth_10MD.png', scale = 3)
 
 
 
@@ -294,7 +294,7 @@ fig <- subplot(nrows = 2,
                titleX = T, titleY = T, shareX = T)
 
 
-save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/MinImpl_and_OptDepth_10%.png', scale = 3)
+save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/MinImpl_and_OptDepth_10MD.png', scale = 3)
 
 
 
@@ -385,7 +385,7 @@ fig <- subplot(hide_colorbar(fig1), hide_colorbar(fig2), fig3,
                titleX = T, titleY = T, shareX = T)
 
 fig
-save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Min_Impl_20%.png', scale = 3)
+save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Min_Impl_20MD.png', scale = 3)
 
 
 
@@ -470,7 +470,7 @@ fig <- subplot(hide_colorbar(fig4), hide_colorbar(fig5), fig6,
 
 #####   SAVE IMAGE    #####
 
-save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Opt_Depth_20%_bis.pdf', scale = 3)
+save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/Opt_Depth_20MD.png', scale = 3)
 
 
 
@@ -538,7 +538,7 @@ fig <- subplot(nrows = 2,
                titleX = T, titleY = T, shareX = T)
 
 
-save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/MinImpl_and_OptDepth_20%.png', scale = 3)
+save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/MinImpl_and_OptDepth_20MD.png', scale = 3)
 
 
 
@@ -564,7 +564,7 @@ save_image(fig, '../Pictures/Non-Implausible_Plots/Gas/MinImpl_and_OptDepth_20%.
 
 ###############################################################################
 
-# 1D HISTOGRAMS: QUICKLY ASSESS WHICH COORDINATES BECOMES IMPORTANT WHEN BOTH
+# 1D HISTOGRAMS: QUICKLY ASSESS WHICH COORDINATE BECOMES IMPORTANT WHEN BOTH
 # CONSTRAINTS ARE CONSIDERED
 
 v <- 1
@@ -589,7 +589,7 @@ colGas <-  "royalblue3"
 colTemp <- "firebrick3"
 colBoth <- t_col("chartreuse3", 0.5)
 
-ylims <- c(2.4, 2.6, NA, NA, NA, 10, NA, NA)
+ylims <- c(1.6, 34.7, NA, NA, NA, 26.5, NA, NA)
 
 
 #######################################################
@@ -617,18 +617,19 @@ for (v in c(1,2,6)){
   
   # Set all histogram details (with empty histogram)
   hist(Both, breaks = 10, freq = F, border=NA, col = NULL,
-       main = "", xlab = colnames(Design)[v], 
-       xlim = c(-1,1), ylim = c(0, ylims[v]) )
+       main = "", xlab = par_names[v], 
+       xlim = Ranges_Params[,v], ylim = c(0, ylims[v]),
+       yaxt = 'n', ylab = '')
   
   # Plot the three histograms: interior and then outer border
   h1 <- hist(Temp, breaks = 50, freq = F, density = 15, border=NA, col = colTemp, add = T)
-  lines(c(-1,h1$breaks), c(0, h1$density, 0), type="s", col = colTemp, lwd = 1.5)
+  lines(c(h1$breaks[1], h1$breaks), c(0, h1$density, 0), type="s", col = colTemp, lwd = 1.5)
   
   h2 <- hist(Gas, breaks = 50, freq = F, density = 15, border=NA, col = colGas, angle = 135, add = T)
-  lines(c(-1,h2$breaks), c(0, h2$density, 0), type="s", col = colGas, lwd =1.5)
+  lines(c(h2$breaks[1], h2$breaks), c(0, h2$density, 0), type="s", col = colGas, lwd =1.5)
   
-  h3 <- hist(Both, breaks = 12, freq = F, col = colBoth, border = NA, add = T)
-  lines(c(h3$breaks[1],h3$breaks), c(0, h3$density, 0), type="s", col = "chartreuse4", lwd =2)
+  h3 <- hist(Both, breaks = 10, freq = F, col = colBoth, border = NA, add = T)
+  lines(c(h3$breaks[1], h3$breaks), c(0, h3$density, 0), type="s", col = "chartreuse4", lwd =2)
   
   legend(ifelse(v==1, "topleft", "topright"), 
          legend=c("Temp Non-Impl", "Gas Non-Impl", "Non-Implaus"),
@@ -638,7 +639,7 @@ for (v in c(1,2,6)){
          angle = c(45, 135, NA),                        # angle of oblique lines
          y.intersp=1.2,                  # vertical distance factor between legend lines
          inset=0.05,                     # put legend a bit more inside, not on the edge
-         bty = "n",                      # no box is draw
+         bty = "n",                      # no box is drawn
          cex = 1.3)                      # scaling factor of text, squares etc
   
   dev.off()
@@ -650,7 +651,7 @@ for (v in c(1,2,6)){
 ############################################################################
 
 # Prepare png file
-file_name <- "../Pictures/Non-Implausible_Plots/Gas_and_Temperature/Non-Implas.png"
+file_name <- "../Pictures/Non-Implausible_Plots/Gas_and_Temperature/Non-Implaus.png"
 png(file_name, width = 18, height = 6, unit="in", res=288)
 
 # Set graphical parameters
@@ -670,15 +671,16 @@ for (v in c(1,2,6)){
   
   # Set all histogram details (with empty histogram)
   hist(Both, breaks = 10, freq = F, border=NA, col = NULL,
-       main = "", xlab = colnames(Design)[v], ylab = ifelse(v==1, "Density", ""),
-       xlim = c(-1,1), ylim = c(0, ylims[v]) )
+       main = "", xlab = par_names[v],
+       xlim = Ranges_Params[,v], ylim = c(0, ylims[v]),
+       yaxt = 'n', ylab = '')
   
   # Plot the three histograms: interior and then outer border
   h1 <- hist(Temp, breaks = 50, freq = F, density = 15, border=NA, col = colTemp, add = T)
-  lines(c(-1,h1$breaks), c(0, h1$density, 0), type="s", col = colTemp, lwd = 1.5)
+  lines(c(h1$breaks[1],h1$breaks), c(0, h1$density, 0), type="s", col = colTemp, lwd = 1.5)
   
   h2 <- hist(Gas, breaks = 50, freq = F, density = 15, border=NA, col = colGas, angle = 135, add = T)
-  lines(c(-1,h2$breaks), c(0, h2$density, 0), type="s", col = colGas, lwd =1.5)
+  lines(c(h2$breaks[1],h2$breaks), c(0, h2$density, 0), type="s", col = colGas, lwd =1.5)
   
   h3 <- hist(Both, breaks = 10, freq = F, col = colBoth, border = NA, add = T)
   lines(c(h3$breaks[1],h3$breaks), c(0, h3$density, 0), type="s", col = "chartreuse4", lwd =2)
